@@ -339,6 +339,9 @@
   <script src="vendor/datatables/jquery.dataTables.min.js"></script> 
   <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script> 
 
+  <!-- Moment.js Library -->
+  <script src="lib/moment.min.js"></script>
+
   <script>
    
     $(document).ready(function() {
@@ -361,7 +364,7 @@
       }
       else{
         
-        $('#chkEmpNotAll').attr("checked", false);
+        $('#chkEmpNotAll').attr("checked", false);  
       }
       
       $('#sideBar-EmpList').on('click', function(){
@@ -435,7 +438,15 @@
       }
 
       function GetCurrentDate(){
+
         var fullDate = new Date();
+       
+        CurDate = moment(fullDate).format('YYYY-MM-DD');
+        prevDate = moment(CurDate).subtract(1, 'month');
+        prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
+  
+ 
+        /*
         var GetDate;
         var GetMonth;
         var prevMonth;
@@ -461,10 +472,10 @@
         else{
           GetDate = fullDate.getDate();
         }
-       
+        
         CurDate = fullDate.getFullYear() + "-" +  GetMonth + "-"  + GetDate;
         prevDate = fullDate.getFullYear() + "-" +  prevMonth   + "-"  + "01";
-        
+        */
        
       }
 

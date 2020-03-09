@@ -1041,6 +1041,9 @@
   <!-- Page level custom scripts for dataTable -->
   <script src="vendor/datatables/jquery.dataTables.min.js"></script> 
   <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+  <!-- Moment.js Library -->
+  <script src="lib/moment.min.js"></script>
  
   <script>
    
@@ -1860,8 +1863,14 @@
         });
 
         function GetCurrentDate(){
+          
+          CurDate = moment(fullDate).format('YYYY-MM-DD');
+        prevDate = moment(CurDate).subtract(1, 'month');
+        prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
 
 
+
+          /*
           //to get the equivalent number of month
           if(String(fullDate.getMonth()).length == 1){
             GetMonth = fullDate.getMonth()+1;
@@ -1889,7 +1898,7 @@
           CurDate = fullDate.getFullYear() + "-" +  GetMonth + "-"  + GetDate;
           prevDate = fullDate.getFullYear() + "-" +  prevMonth   + "-"  + "01";
        
-          
+          */
         }
 
         function edit_loadEmpImage(){

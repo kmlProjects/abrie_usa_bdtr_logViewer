@@ -44,7 +44,7 @@
                               TIME(L.actual_out) AS Actual_timeOut_timeOnly,
                               L.actual_in AS Actual_timeIn, 
                               L.actual_out As Actual_timeOut,
-                              D.name AS Dept, L.min_late, L.min_under, L.is_voided
+                              D.name AS Dept, L.min_late, L.min_under, L.is_voided, L.duty_in, L.duty_out
                         FROM tbl_logs AS L 
                             INNER JOIN tbl_employee AS E on  E.id_employee = L.id_employee
                             INNER JOIN tbl_terminal AS T on T.id_terminal = L.id_terminal
@@ -441,6 +441,7 @@
                                 </td>
                                 <!-- column1 -->
                                 <td data-target="dutyInTime"><?php 
+                                                                   
                                                                    $DutyIn = new DateTime($result_empLogs['Duty_InTime']);
                                                                   echo $DutyIn->format('g:i A');
                                                               ?>
@@ -541,7 +542,9 @@
                                     ?>                           
                                 </td>
                                 <td>
-                                  <button data-toggle="editLogs" title="EDIT" data-role="editLogs" class="btn btn-success btn-sm btn-circle"  data-logsid="<?php echo $result_empLogs['id_logs']; ?>" 
+                                  <button data-toggle="editLogs" title="EDIT" data-role="editLogs" class="btn btn-success btn-sm btn-circle"  
+                                          data-logsid="<?php echo $result_empLogs['id_logs']; ?>" data-dutyIn="<?php echo $result_empLogs['duty_in'];?>"
+                                          data-dutyOut="<?php echo $result_empLogs['duty_out'];?>"
                                           data-isvoided="<?php echo $result_empLogs['is_voided']; ?>" style="width:18%" name='btnViewReport' id="editLogs">
                                       <span class='icon text-white-50'>
                                        <i class='far'>&#xf044;</i> 
@@ -876,7 +879,10 @@
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Please enter valid edited log!</div>
+        <div class="modal-body">Please enter valid edited log!
+        <br>
+        <p id="message"></p>
+        </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-dismiss="modal">Okay</button>
         </div>
@@ -1083,6 +1089,7 @@
        var newLogstage;
        var comments_flag;
        var editComments; 
+       var dutyIn_actualFormat, dutyOut_actualFormat;
        
       
     
@@ -1153,10 +1160,6 @@
           if((dateStart == null || dateEnd == null) && resultShowOption == 0)  {
             $('#alertNoselectedDates').modal('show');
           }
-          /*
-          else if ((dateStart > dateEnd) || (dateEnd > CurDate)){
-            $('#alertInvalidDates').modal('show');
-          }*/
           else{
             if(dateStart == null || dateEnd == null){
               $.ajax({
@@ -1236,6 +1239,10 @@
         $('.table tbody').on('click','#editLogs',function(){
           $('[data-toggle="editLogs"]').tooltip('hide');
           id_logs = $(this).attr("data-logsid");
+          dutyIn_actualFormat = $(this).attr("data-dutyIn");
+          dutyOut_actualFormat = $(this).attr("data-dutyOut");
+
+         
          
           $("#editModal").modal();
           edit_loadEmpImage();
@@ -1385,6 +1392,7 @@
         //audit_trail button
         $('.table tbody').on('click','#viewAuditTrail',function(){
           id_logs = $(this).attr("data-logsid");
+
           $.ajax({
                 url: 'db/session_idLogs.php',
                 method: 'post',
@@ -1517,7 +1525,7 @@
                           id_log:id_logs
                         },
                    success: function(data){
-                     alert(data);
+                    
                      location.reload(true);
                    }
             });
@@ -1541,11 +1549,16 @@
         //editing login time
         $('#txtActualIn').change(function(){
            editLogin = $('#txtActualIn').val();
-           verify_editLog(editLogin,1);
+
+         
+           var login_edited = new Date(DutyDate + ' ' +editLogin);
+           
+           verify_editLog(login_edited,1, dutyIn_actualFormat, dutyOut_actualFormat);
         });
 
         $('#txtActualIn').focusout(function(){
-
+       
+          
            if((newLogstage>1) && (editLogin == null)){
            
              $('#alertInvalidTime').modal();
@@ -1567,7 +1580,10 @@
         $('#txtActualOut').change(function(){
            editLogout = null;
            editLogout = $('#txtActualOut').val();
-           verify_editLog(editLogout,2);
+
+           var logout_edited = new Date(DutyDate + ' ' +editLogout);
+          
+           verify_editLog(logout_edited,2, dutyIn_actualFormat, dutyOut_actualFormat);
         });
 
         $('#txtActualOut').focusout(function(){
@@ -1758,7 +1774,7 @@
             $("#lblReasonForEdit").html(editComments);
            
 
-            //verification if there is need to update
+            //verification if there is a need to update
             if (logstage != newLogstage){
               $("#UpdateForm").modal();
             }
@@ -1865,8 +1881,8 @@
         function GetCurrentDate(){
           
           CurDate = moment(fullDate).format('YYYY-MM-DD');
-        prevDate = moment(CurDate).subtract(1, 'month');
-        prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
+          prevDate = moment(CurDate).subtract(1, 'month');
+          prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
 
 
 
@@ -2038,7 +2054,8 @@
         }
 
         function remove_logout_rules(){
-          if((logstage<3 ) && (newLogstage<3)){
+          
+          if(logstage<3 ){
             $('#btnRemoveLogout').attr("disabled", true);
           }
           else{
@@ -2046,57 +2063,63 @@
           }
         }
 
-        function verify_editLog(time_param, log_flag){
-         
-          //if log_flag = 1, means time_param 
-          //if log_flag = 2, means time_param is logout
-         
-
-          var Time_split;
-          var TimeMinute_split;
-          var Time_hour;
-          var Time_minute;
-
-          //manipulatime time_param;
-          var Time_param_split = time_param.split(":");
-          var Time_paramHour = Time_param_split[0];
-          var Time_paramMinute = Time_param_split[1];
+        function verify_editLog(time_param, log_flag, login, logout){
+          
+          var result1, result2;
+          var result3, result4;
+          var getLoginMinute;
+          var maxAllowedTimeIn, late;
+          var login_maxAllowed, login_basisSched;
+          var logout_maxAllowed, logout_basisSched, forError_maxTime;//, login_edited;
           
           
-          //for hour that exceeds 12pm
-          if (Time_paramHour>12){
-            Time_paramHour = Time_paramHour - 12;
-          }
 
-          if(log_flag==1){ // for login
-           
-            //manipulate startTimeIn variable
-            Time_split = startTimeIn.split(":"); //to split hour and minute 
-            Time_hour = Time_split[0]; //get the hour portion  of the time  
-            TimeMinute_split = Time_split[1].split(" "); //split the minute and meridian of the time 
-            Time_minute = TimeMinute_split[0]; //get the minute portion  of the time
+          if(log_flag == 1){
+            //startTimeIn is the actual recorded timeIn
+            //time_param is the actual edited time
             
-
-            //catching for invalid edit of login time
-            if(Time_hour == Time_paramHour){
+            //need to compare if time_param is valid 
+             login_basisSched = moment(dutyIn_actualFormat); //also the minimum value of login basis
+             login_maxAllowed = moment(login_basisSched).add(15,'m');
+             
+             //get the basis
+             result1 = moment(time_param).isSameOrAfter(login_basisSched, 'm');
+             result2 = moment(time_param).isSameOrBefore(login_maxAllowed, 'm');
               
-               //+ in TIme_paramMinute and Time_minute is to eliminate leading zero
-               minute_allowed = +Time_minute + 10;
-               
-              if(+Time_paramMinute > minute_allowed){
-                
-
-                $('#alertInvalidTime').modal('show');
-                editLogin = $('#txtActualIn').val("");
-                editLogin = null;
-                $('#txtActualIn').focus();
-              }
-              else{
-                
+             
+            //chek if time_param is allowable value
+            if((result1 == true) && (result2 == true)){ 
                 login_status_edit = 1;  
                 editedLogin_flag = 1;
-                $('#edit_minlate').html(0); 
+
+                
+        
+
+               
+                  //get the maximum allowable login time
+                  maxAllowedTimeIn = moment(login_basisSched).add(10,'m');
+
+                  //verify if it is late
+                  if(moment(time_param).isAfter(maxAllowedTimeIn)){
+                    //meaning it is late, and compute the late
+                   
+                    //get the minute time from expected login and add 10minutes
+                    getLoginMinute = parseInt(moment(login).format('m')) + parseInt(10);
+                  
+                    //compute the late
+                    late = moment(time_param).subtract(getLoginMinute,'m').format('m');
+                    
+                    //display the late
+                    $('#edit_minlate').html(late); 
+                   
+                  }
+                  else{
+                    //no late
+                    $('#edit_minlate').html(0); 
+                  }
+
                 newLogin_DateTime = DutyDate + " " + editLogin +":00";
+                
                 if(logstage == 1){
                   $('#btnEditLogout').attr('disabled',false);
                 }
@@ -2105,57 +2128,53 @@
                 remove_login_rules();
                 remove_logout_rules();
                 btnUpdate_settings();
-              }
-            } 
-            else{
-             
-              $('#alertInvalidTime').modal('show');
-              editLogin = $('#txtActualIn').val("");
-              editLogin = null;
-              $('#txtActualIn').focus();
             }
-           
-          }
-          else{ //log_flag=2
-            //manipulate endTimeOut variable
-            Time_split = endTimeOut.split(":"); //to split hour and minute 
-            Time_hour = Time_split[0]; //get the hour portion  of the time  
-            TimeMinute_split = Time_split[1].split(" "); //split the minute and meridian of the time 
-            Time_minute = TimeMinute_split[0]; //get the minute portion  of the time
+            else{
 
-            
-          
-            //catching for invalid edit of logout time
-            if(Time_hour == Time_paramHour){
-              minute_allowed = +Time_minute + 10;
-              if(+Time_paramMinute > minute_allowed){
-                
+                forError_maxTime = moment(login_basisSched).add(15,'m').format("hh:mm A");
+                $('#message').empty().html('<p>The valid time range for login is from ' + startTimeIn + ' - ' + forError_maxTime + '</p>');
                 $('#alertInvalidTime').modal('show');
-                editLogout = $('#txtActualOut').val("");
-                editLogout = null;
-                $('#txtActualOut').focus();
-              }
-              else{
-             
+                editLogin = $('#txtActualIn').val("");
+                editLogin = null;
+                $('#txtActualIn').focus();
+            }
+            
+
+          }
+          else{
+
+
+             //need to compare if time_param is valid 
+             logout_basisSched = moment(dutyOut_actualFormat); //also the minimum value of logout basis
+             logout_maxAllowed = moment(logout_basisSched).add(15,'m');
+
+             result3 = moment(time_param).isSameOrAfter(logout_basisSched, 'm');
+             result4 = moment(time_param).isSameOrBefore(logout_maxAllowed, 'm');
+
+             if((result3 == true) && (result4 == true)){
+               
                 editedLogout_flag=1;
                 logout_status_edit = 1;
+
                 $('#edit_minunder').html(0);
                 newLogout_DateTime = DutyDate + " " + editLogout +":00";
+                
                 determine_newLogstage();
                 edit_logout_rules()
                 remove_login_rules();
                 remove_logout_rules();
                 btnUpdate_settings();
-              }
-            } 
-            else{
-             
-              $('#alertInvalidTime').modal('show');
-              editLogout = $('#txtActualOut').val("");
-              editLogout = null;
-              $('#txtActualOut').focus();
-            }
+             }
+             else{
+                forError_maxTime = moment(login_basisSched2).add(15,'m').format("hh:mm A");  
+                $('#message').empty().html('<p>The valid time range for logout is from ' + endTimeOut+ ' - ' + forError_maxTime + '</p>');
+                $('#alertInvalidTime').modal('show');
+                editLogout = $('#txtActualOut').val("");
+                editLogout = null;
+                $('#txtActualOut').focus();
+             }
           }
+          
         }
 
         function GetNewLoginAndLogoutTime(dateTime_param){

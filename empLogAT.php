@@ -374,8 +374,14 @@
                                                 
                                                  <!-- column1 Actual Out-->
                                                 <td class="text-right"><?php 
-                                                        $actualOut = new DateTime($result_empLogs['Actual_timeOut_timeOnly']);
-                                                        echo $actualOut->format('g:i A');
+                                                        if($result_empLogs['Actual_timeOut_timeOnly']=='00:00:00'){
+                                                          echo "MISSED";
+                                                        }
+                                                        else{
+                                                          $actualOut = new DateTime($result_empLogs['Actual_timeOut_timeOnly']);
+                                                          echo $actualOut->format('g:i A');
+                                                        }
+                                                        
                                                     ?>
                                                 </td>
                                                 

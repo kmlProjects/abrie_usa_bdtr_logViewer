@@ -405,7 +405,7 @@
               
               <div class="card-body" id="tblLogs">  <!--card-body TABLE -->
                 <div class="table-responsive" id="divDataTable_empLogHis"> <!-- table-responsive -->         
-                  <table class="table table-bordered table-bordered table-sm" id="dataTable" width="100%" cellspacing="0"> <!-- table-bordered -->
+                  <table class="table table-bordered table-bordered table-hover table-sm" id="dataTable" width="100%" cellspacing="0"> <!-- table-bordered -->
                     <thead>
                       <tr class="text-center">
                         <th><strong>DATE</strong></th>    <!-- column0 -->

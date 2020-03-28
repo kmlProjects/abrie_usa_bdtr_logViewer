@@ -214,7 +214,7 @@
                         
                         if($rowCount >= 1){
 
-                          echo  "<table class='table table-bordered text-dark' id='dataTable_' width='100%' cellspacing='0'>
+                          echo  "<table class='table table-bordered text-dark table-hover' id='dataTable_' width='100%' cellspacing='0'>
                                    <thead class='text-danger'>
                                       <tr>
                                         <th><strong>Employee Name</strong></th>

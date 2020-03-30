@@ -1,12 +1,8 @@
-<!-- FOR v.1.1.1
-- Display User actual name to upper right instead of log name
- - Change log out status text "No Logged Out" with "MISSED", also shorten the column width
- - Change log in status text "No Logged In" with "MISSED", also shorten the column width
- - Remove Date on Log out / Log In sine date is already shown at left, also shorten the column width
- - Remove "Voided" Column. If voided, change Log In/Out status into "VOIDED"
-
- - Fix allowed time for editing of login and logout
- - Fix late after editing of login
+<!-- FOR v.2.0.0
+- include the Work Schedule CRUD
+  *index.php ---DataTable--Change nge Column Action into Logs
+  *index.php ---Add Column in DataTable, name it Schedules with corresponding button
+  *add another page --WorkSchedule
 -->
 
 
@@ -51,7 +47,7 @@
             <!-- 
               
             -->
-           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.1.1.1</span></label> </h1>
+           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.0</span></label> </h1>
     </div>
 
     <!-- Outer Row -->

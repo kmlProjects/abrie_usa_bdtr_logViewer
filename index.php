@@ -215,17 +215,18 @@
                         if($rowCount >= 1){
 
                           echo  "<table class='table table-bordered text-dark table-hover' id='dataTable_' width='100%' cellspacing='0'>
-                                   <thead class='text-danger'>
+                                   <thead class='text-danger text-center'>
                                       <tr>
                                         <th><strong>Employee Name</strong></th>
                                         <th><strong>RFID No.</strong></th>
                                         <th><strong>Program Name</strong></th>
-                                        <th><strong>Action</strong></th>
+                                        <th><strong>Schedules</strong></th>
+                                        <th><strong>Logs</strong></th>
                                       </tr>
                                     </thead>
                                     <tfoot>
                                       <tr class='text-danger'>
-                                        <th colspan='4'>
+                                        <th colspan='5'>
                                           <div class='custom-control custom-checkbox small text-right text-danger'>
                                             <input type='checkbox'  data-role='emplist_toggle' name='chkBx_empAll' id='chkEmpNotAll' value='Show Active Employees Only'>
                                             <label class='custom-label'><strong>Show Active Employees Only</strong></label>
@@ -241,11 +242,19 @@
                                             echo "<td data-target='eName'>".$row['EName']."</td>";
                                             echo "<td data-target='rfidNo'>".$row['rfid_no']."</td>";
                                             echo "<td data-target='progName'>".$row['program_name']."</td>";
+                                            echo "<td id='btnViewSched'>";
+                                                echo "<button data-role='viewSched' class='btn btn-danger btn-sm'  data-empid='".$row['id_employee']."' style='width:100%' name='btnViewSched'>";
+                                                    echo "<span class='icon text-white-50'>";
+                                                      echo "<i class='fas'>&#xf073;</i>";
+                                                    echo "</span> &nbsp"; 
+                                                    echo "<span class='text'>VIEW</span>";
+                                                echo "</button>";
+                                            echo "</td>";
                                             echo "<td id='viewButton'>";
-                                                echo "<button data-role='view' class='btn btn-danger btn-sm'  data-empid='".$row['id_employee']."' style='width:100%' name='btnViewLogs'>";
+                                                echo "<button data-role='view' class='btn btn-warning btn-sm'  data-empid='".$row['id_employee']."' style='width:100%' name='btnViewLogs'>";
                                                     echo "<span class='icon text-white-50'>";
                                                       echo "<i class='fas'>&#xf4fd; </i>";
-                                                    echo "</span>";
+                                                    echo "</span>&nbsp";
                                                     echo "<span class='text'>VIEW</span>";
                                                 echo "</button>";
                                             echo "</td>";
@@ -383,11 +392,33 @@
             });
       });
      
+      //work schedule view
+      $(document).on('click','button[data-role=viewSched]',function(){
+        var empId = $(this).data('empid');
+        var current_row = $(this).closest('tr');
+        var employee = current_row.find('td:eq(0)').text(); //column 3
 
+        $.ajax({
+            url:'db/session_empid.php',
+            method: 'post',
+            data:{
+              empId:empId, 
+              empName: employee
+
+            },
+            success: function(data){
+              location.replace("workSched.php");  
+            }
+        });
+      });
+      
+      //logs view
       $(document).on('click','button[data-role=view]',function(){  
         var empId = $(this).data('empid');
         
+        
         $.post("db/session_empid.php",{
+                                          viewOption:'viewLogs',
                                           empId:empId, 
                                           showOption:1, 
                                           filter:1,
@@ -398,6 +429,8 @@
           }
         );
       });
+
+
 
 
       $(document).on('click','input:checkbox[data-role=emplist_toggle]',function(){   

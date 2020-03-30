@@ -1177,11 +1177,13 @@
                });
             }
             else{
+             
               $.ajax({
                    url: 'db/session_empid.php',
                    method: 'post',
                    data:{ empId:<?php echo $empID; ?>,
                           showOption:resultShowOption, 
+                          
                           filter:2,
                           dateStart:dateStart,
                           dateEnd:dateEnd},

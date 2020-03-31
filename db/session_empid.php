@@ -12,9 +12,16 @@
               $_SESSION['startDate'] = $_POST['dateStart'];
               $_SESSION['endDate'] = $_POST['dateEnd'];
        }
-       else{
+       else{ //for workSchedule.php default settings
               $_SESSION['workSched_empName'] = $_POST['empName'];
+
+              if($_POST['filterDate']==3){//for workSchedule.php with filter Date
+                     $_SESSION['isDateFiltered'] = 3;
+                     $_SESSION['def_startDate'] = $_POST['dateStart'];
+                     $_SESSION['def_endDate'] = $_POST['dateEnd'];
+              }
        }
+
 
        
        

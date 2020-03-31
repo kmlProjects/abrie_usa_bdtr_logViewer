@@ -1096,9 +1096,6 @@
        
       
     
-      
-       
-
        //declaration for Show Options
        var isLoggedSched = false;
        var isAbsentedSched = false;
@@ -1158,44 +1155,7 @@
      
 
       //events happened during running time
-        //filter button click event
-        $(document).on('click','button[data-role=filter]',function(){
-          if((dateStart == null || dateEnd == null) && resultShowOption == 0)  {
-            $('#alertNoselectedDates').modal('show');
-          }
-          else{
-            if(dateStart == null || dateEnd == null){
-              $.ajax({
-                   url: 'db/session_empid.php',
-                   method: 'post',
-                   data:{ empId:<?php echo $empID; ?>,
-                          showOption:resultShowOption, 
-                          filter:1},
-                   success: function(data){
-                     location.reload(true);
-                   }
-               });
-            }
-            else{
-             
-              $.ajax({
-                   url: 'db/session_empid.php',
-                   method: 'post',
-                   data:{ empId:<?php echo $empID; ?>,
-                          showOption:resultShowOption, 
-                          
-                          filter:2,
-                          dateStart:dateStart,
-                          dateEnd:dateEnd},
-                   success: function(data){
-                     location.reload(true);
-                   }
-              });
-
-            }
-              
-          }
-        });
+        
 
         //edit button tooltip
         $('[data-toggle="editLogs"]').tooltip();
@@ -1498,6 +1458,46 @@
              dateEnd = $("#endDate").val();
            }
         );
+
+
+        //filter button click event
+        $(document).on('click','button[data-role=filter]',function(){
+          if((dateStart == null || dateEnd == null) && resultShowOption == 0)  {
+            $('#alertNoselectedDates').modal('show');
+          }
+          else{
+            if(dateStart == null || dateEnd == null){
+              $.ajax({
+                   url: 'db/session_empid.php',
+                   method: 'post',
+                   data:{ empId:<?php echo $empID; ?>,
+                          showOption:resultShowOption, 
+                          filter:1},
+                   success: function(data){
+                     location.reload(true);
+                   }
+               });
+            }
+            else{
+             
+              $.ajax({
+                   url: 'db/session_empid.php',
+                   method: 'post',
+                   data:{ empId:<?php echo $empID; ?>,
+                          showOption:resultShowOption, 
+
+                          filter:2,
+                          dateStart:dateStart,
+                          dateEnd:dateEnd},
+                   success: function(data){
+                     location.reload(true);
+                   }
+              });
+
+            }
+              
+          }
+        });
         //*****END OF FILTER DATES */
       
 

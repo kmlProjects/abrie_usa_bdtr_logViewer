@@ -5,8 +5,19 @@
   $is_active = $_SESSION['emp_isActive'];
   
   $dtruser = $_SESSION['login_userId'];
+  $empID = $_SESSION['empId'];
   $employeeName = $_SESSION['workSched_empName'];
- 
+  echo  $employeeName ;
+  $isDateFiltered;
+  if(isset($_SESSION['isDateFiltered'])){
+    $isDateFiltered = $_SESSION['isDateFiltered'];
+  }
+  else{
+    $isDateFiltered = 0;
+  }
+  
+  
+  
 
   $query = "SELECT 
                       WS.id_work_schedule,
@@ -19,8 +30,19 @@
                   INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                   INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
                   INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
-              WHERE E.id_employee = $dtruser
-              ORDER BY WS.work_name ASC";
+              WHERE E.id_employee = $empID";
+
+              if($isDateFiltered == 3){
+                $filter_dateStarted = "'" . $_SESSION['startDate'] ."'";
+                $filter_dateEnd = "'" . $_SESSION['endDate'] ."'";
+
+                $query .= "AND WS.duration_from = '$filter_dateStarted' AND  WS.duration_to = '$filter_dateEnd'";
+
+              
+              }
+
+              $query .= " ORDER BY WS.work_name ASC";
+             
                       
     
 ?>
@@ -258,12 +280,12 @@
                               <div class="row">
                                 <div class="col-4">
                                     <div class="row">
-                                        <div class="col-1"></div>
+                                        &nbsp;&nbsp;
                                         <div class="col-3">
                                             <label class="label">FROM:</label>
                                         </div>
-                                        <div class="col-2">
-                                            <input class="form-control" id="startDate" name="startDate" placeholder="Start Date" type="date" style="width:180px"/>
+                                        <div class="col-3 text-right">
+                                            <input class="form-control" id="wsStartDate" name="startDate" placeholder="Start Date" type="date" style="width:180px"/>
                                         </div>
                                     </div>
                                 </div>
@@ -274,7 +296,7 @@
                                             <label class="label">TO:</label>
                                         </div>
                                         <div class="col-2">
-                                            <input class="form-control" id="endDate" name="endDate" placeholder="End Date" type="date" style="width:180px"/>
+                                            <input class="form-control" id="wsEndDate" name="endDate" placeholder="End Date" type="date" style="width:180px"/>
                                         </div>
                                         <div class="col-3">
                                           <button class="btn btn-danger btn-md" id="btnFilter" data-role="filter" >
@@ -522,6 +544,26 @@
     <i class="fas fa-angle-up"></i>
   </a>
 
+  <!-- Modal for No selected Dates from filter command -->
+  <div class="modal fade" id="alertNoselectedDates" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">NO DATES AND SHOW OPTIONS TO FILTER!</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Please enter dates to filter or select an option to show.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Okay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal  No selected Dates-->     
+
+  
   <!-- Logout Modal-->
   <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -567,6 +609,7 @@
       
       var CurDate = null;
       var prevDate = null;
+      var dateStart, dateEnd;
 
       $('#dataTable_workSchedule').DataTable({
         "oLanguage": {
@@ -579,8 +622,48 @@
       loadEmpImage(); 
       GetCurrentDate();
 
+       //*******FILTER DATES */
+        //to get StartDate value for filtering records
+        $('#wsStartDate').change(function(){
+            dateStart = $(this).val();
+          }
+        );
+
+        // //to get EndDate value  for filtering records
+        $('#wsEndDate').change(function(){
+             dateEnd = $(this).val();
+           }
+        );
 
 
+        //filter button click event
+        
+        $(document).on('click','button[data-role=filter]',function(){
+          if((dateStart == null || dateEnd == null))  {
+            $('#alertNoselectedDates').modal('show');
+          }
+          else{
+              
+              $.ajax({
+                   url: 'db/session_empid.php',
+                   method: 'post',
+                   data:{ empId:<?php echo $empID; ?>,
+                          filterDate:3,
+                          dateStart:dateStart,
+                          dateEnd:dateEnd},
+                   success: function(data){
+                     location.reload(true);
+                   }
+              }); 
+              //waiting for sir ryan's response
+
+            
+              
+          }
+        }); 
+        //*****END OF FILTER DATES */
+
+      
       function getUserPic(){
         $.ajax({
             url: 'db/dbEmpImage.php',
@@ -599,8 +682,20 @@
         CurDate = moment(fullDate).format('YYYY-MM-DD');
         prevDate = moment(CurDate).subtract(3, 'month');
         prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
-  
-        SetDateFilter_DefaultValue(prevDate, CurDate);
+        
+       
+        <?php  
+              if($isDateFiltered != 3){
+        ?>
+                  SetDateFilter_DefaultValue(prevDate, CurDate);
+        <?php 
+              } 
+        ?>
+          
+               
+        
+       
+       
       }
 
       function loadEmpImage(){
@@ -616,8 +711,11 @@
       }
 
       function SetDateFilter_DefaultValue(fromDate, toDate){
-        $('#startDate').val(fromDate);
-        $('#endDate').val(toDate);
+        $('#wsStartDate').val(fromDate);
+        $('#wsEndDate').val(toDate);
+        dateStart = $('#wsStartDate').val();
+        dateEnd = $('#wsEndDate').val();
+
       }
 
       

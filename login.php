@@ -49,7 +49,7 @@
             <!-- 
               
             -->
-           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.0</span></label> </h1>
+           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.1</span></label> </h1>
     </div>
 
     <!-- Outer Row -->

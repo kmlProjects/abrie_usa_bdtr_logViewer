@@ -2,20 +2,20 @@
   session_start();
   require "db/dbconnect.php";
 
-  $is_active = $_SESSION['emp_isActive'];
   
   $dtruser = $_SESSION['login_userId'];
   $empID = $_SESSION['empId'];
   $employeeName = $_SESSION['workSched_empName'];
-  echo  $employeeName ;
-  $isDateFiltered;
-  if(isset($_SESSION['isDateFiltered'])){
-    $isDateFiltered = $_SESSION['isDateFiltered'];
-  }
-  else{
-    $isDateFiltered = 0;
-  }
+  $isDateFiltered = $_SESSION['WS_DateFiltered'];
+  $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
+  $filter_dateEnd = "'" . $_SESSION['WS_def_endDate'] ."'";
   
+  
+  
+
+  
+  //echo "<br />";
+ // echo $isDateFiltered; 
   
   
 
@@ -30,20 +30,11 @@
                   INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                   INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
                   INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
-              WHERE E.id_employee = $empID";
-
-              if($isDateFiltered == 3){
-                $filter_dateStarted = "'" . $_SESSION['startDate'] ."'";
-                $filter_dateEnd = "'" . $_SESSION['endDate'] ."'";
-
-                $query .= "AND WS.duration_from = '$filter_dateStarted' AND  WS.duration_to = '$filter_dateEnd'";
-
-              
-              }
-
-              $query .= " ORDER BY WS.work_name ASC";
+              WHERE E.id_employee = $empID AND WS.duration_from >= $filter_dateStarted AND  WS.duration_to <= $filter_dateEnd
+              ORDER BY WS.work_name ASC";
              
-                      
+           //    echo "<br />";        
+           //  echo $query;
     
 ?>
 
@@ -285,7 +276,7 @@
                                             <label class="label">FROM:</label>
                                         </div>
                                         <div class="col-3 text-right">
-                                            <input class="form-control" id="wsStartDate" name="startDate" placeholder="Start Date" type="date" style="width:180px"/>
+                                            <input class='form-control' id='wsStartDate' name='startDate'  placeholder='Start Date' type='date' style='width:180px'/>  
                                         </div>
                                     </div>
                                 </div>
@@ -296,7 +287,7 @@
                                             <label class="label">TO:</label>
                                         </div>
                                         <div class="col-2">
-                                            <input class="form-control" id="wsEndDate" name="endDate" placeholder="End Date" type="date" style="width:180px"/>
+                                            <input class='form-control' id='wsEndDate' name='endDate' placeholder='End Date' type='date' style='width:180px'/>
                                         </div>
                                         <div class="col-3">
                                           <button class="btn btn-danger btn-md" id="btnFilter" data-role="filter" >
@@ -337,175 +328,179 @@
                       <?php
                         if(isset($query)){  
                           $execute_query = mysqli_query($con, $query);
-                          $rowCount = mysqli_num_rows($execute_query);
 
-                          if($rowCount == 0) {
+                          if(!$execute_query){
+                            //error in executing
                           }
                           else{
-                            while($result_workSched = mysqli_fetch_assoc($execute_query)){ 
-                            ?>
-                              <tr>
-                                <td >
-                                    <?php echo $result_workSched['work_name']; ?>   <!-- column0 WORKNAME-->
-                                </td>
-                                <td>
-                                    <?php echo $result_workSched['room_code'];?> <!-- column1 ROOM CODE-->
-                                </td>
-                                <td style='display:none'> <!-- column2 DurationFrom-->
-                                    <?php  echo $result_workSched['durationFrom'];?>
-                                </td>
-                                <td style='display:none'> <!-- column3 DurationTo-->
-                                    <?php echo $result_workSched['durationTo'];?>
-                               </td>
-                               <td>
-                                    <?php 
-                                        $durationFrom = new DateTime($result_workSched['durationFrom']);
-                                        $durationTo = new DateTime($result_workSched['durationTo']);
-                                        echo $durationFrom->format('M.d,Y').' - '. $durationTo->format('M.d,Y');
-                                    ?> <!-- column4 DURATION-->
-                               </td>
-                                <td> <!-- column5 DAYS-->
-                                    <?php 
-                                        $flag_Day=0; //indicator if there were days have been listed
+                            $rowCount = mysqli_num_rows($execute_query);
+                            
+                            if($rowCount == 0) {
+                            }
+                            else{
+                              while($result_workSched = mysqli_fetch_assoc($execute_query)){ 
+                      ?>
 
-                                        for ($x = 1; $x <= 7; $x++) {
-                                          
-                                          switch ($x) {
-                                            case "1":
-                                                if($result_workSched['is_sunday']==1){
-                                                  echo 'Sun';
-                                                  $flag_Day =1;
-                                                }
-                                                break;
-                                            case "2":
-                                                if($result_workSched['is_monday']==1){
-                                                  if($flag_Day==1){
-                                                    echo ' M';
-                                                  }
-                                                  else{
-                                                    echo 'M';
-                                                    $flag_Day =1;
-                                                  }
-                                                }
-                                                break;
-                                            case "3":
-                                              if($result_workSched['is_tuesday']==1){
-                                                if($flag_Day==1){
-                                                  echo ' Tu';
-                                                }
-                                                else{
-                                                  echo 'Tu';
-                                                  $flag_Day =1;
-                                                }
-                                              }
-                                              break;
-                                            case "4":
-                                              if($result_workSched['is_wednesday']==1){
-                                                  if($flag_Day==1){
-                                                    echo ' W';
-                                                  }
-                                                  else{
-                                                    echo 'W';
-                                                    $flag_Day =1;
-                                                  }
-                                              }
-                                                break;
-                                              case "5":
-                                                if($result_workSched['is_thursday']==1){
-                                                      if($flag_Day==1){
-                                                        echo ' Th';
-                                                      }
-                                                      else{
-                                                        echo 'Th';
-                                                        $flag_Day =1;
-                                                      }
-                                                }
-                                                break;
-                                              case "6":
-                                                if($result_workSched['is_friday']==1){
-                                                        if($flag_Day==1){
-                                                          echo ' F';
-                                                        }
-                                                        else{
-                                                          echo 'F';
+                                  <tr>
+                                        <td >
+                                            <?php echo $result_workSched['work_name']; ?>   <!-- column0 WORKNAME-->
+                                        </td>
+                                        <td>
+                                            <?php echo $result_workSched['room_code'];?> <!-- column1 ROOM CODE-->
+                                        </td>
+                                        <td style='display:none'> <!-- column2 DurationFrom-->
+                                            <?php  echo $result_workSched['durationFrom'];?>
+                                        </td>
+                                        <td style='display:none'> <!-- column3 DurationTo-->
+                                            <?php echo $result_workSched['durationTo'];?>
+                                      </td>
+                                      <td>
+                                            <?php 
+                                                $durationFrom = new DateTime($result_workSched['durationFrom']);
+                                                $durationTo = new DateTime($result_workSched['durationTo']);
+                                                echo $durationFrom->format('M.d,Y').' - '. $durationTo->format('M.d,Y');
+                                            ?> <!-- column4 DURATION-->
+                                      </td>
+                                        <td> <!-- column5 DAYS-->
+                                            <?php 
+                                                $flag_Day=0; //indicator if there were days have been listed
+
+                                                for ($x = 1; $x <= 7; $x++) {
+                                                  
+                                                  switch ($x) {
+                                                    case "1":
+                                                        if($result_workSched['is_sunday']==1){
+                                                          echo 'Sun';
                                                           $flag_Day =1;
                                                         }
+                                                        break;
+                                                    case "2":
+                                                        if($result_workSched['is_monday']==1){
+                                                          if($flag_Day==1){
+                                                            echo ' M';
+                                                          }
+                                                          else{
+                                                            echo 'M';
+                                                            $flag_Day =1;
+                                                          }
+                                                        }
+                                                        break;
+                                                    case "3":
+                                                      if($result_workSched['is_tuesday']==1){
+                                                        if($flag_Day==1){
+                                                          echo ' Tu';
+                                                        }
+                                                        else{
+                                                          echo 'Tu';
+                                                          $flag_Day =1;
+                                                        }
+                                                      }
+                                                      break;
+                                                    case "4":
+                                                      if($result_workSched['is_wednesday']==1){
+                                                          if($flag_Day==1){
+                                                            echo ' W';
+                                                          }
+                                                          else{
+                                                            echo 'W';
+                                                            $flag_Day =1;
+                                                          }
+                                                      }
+                                                        break;
+                                                      case "5":
+                                                        if($result_workSched['is_thursday']==1){
+                                                              if($flag_Day==1){
+                                                                echo ' Th';
+                                                              }
+                                                              else{
+                                                                echo 'Th';
+                                                                $flag_Day =1;
+                                                              }
+                                                        }
+                                                        break;
+                                                      case "6":
+                                                        if($result_workSched['is_friday']==1){
+                                                                if($flag_Day==1){
+                                                                  echo ' F';
+                                                                }
+                                                                else{
+                                                                  echo 'F';
+                                                                  $flag_Day =1;
+                                                                }
+                                                        }
+                                                        break;
+                                                    default:
+                                                        if($flag_Day==1){
+                                                          echo ' Sat';
+                                                        }
+                                                        else{
+                                                          echo 'Sat';
+                                                          $flag_Day =1;
+                                                        }
+                                                  }      
                                                 }
-                                                break;
-                                            default:
-                                                if($flag_Day==1){
-                                                  echo ' Sat';
-                                                }
-                                                else{
-                                                  echo 'Sat';
-                                                  $flag_Day =1;
-                                                }
-                                          }      
-                                        }
 
-                                    ?>
-                                </td>
-                                <td style='display:none'>
-                                    <?php echo $result_workSched['log_start'];?>  <!-- column6 logStart-->
-                                </td>
-                                <td style='display:none'>
-                                    <?php echo $result_workSched['log_end'];?>    <!-- column7 logEnd-->
-                                </td>
-                                <!-- column8-->
-                                <td> 
-                                      <?php 
-                                            $logStart = new DateTime($result_workSched['log_start']);
-                                            $logEnd = new DateTime($result_workSched['log_end']);
-                                            echo $logStart->format('g:i A').'-'.$logEnd->format('g:i A'); ?>
-                                </td>
-                                
-                                
-                                <td>
-                                  <button data-toggle="editWS" title="EDIT" data-role="editWS" class="btn btn-success btn-sm btn-circle"  
-                                          data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
-                                          style="width:18%" name='btnEditWS' id="btnEditWS">
-                                      <span class='icon text-white-50'>
-                                       <i class='far'>&#xf044;</i> 
-                                      </span>
-                                    <!-- <span class='text'>EDIT </span> -->
-                                  </button>
-                                  &nbsp; 
-                                  <button data-toggle="deleteWS" title="DELETE" data-role="deleteWS" class="btn btn-primary btn-sm btn-circle"  
-                                          data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
-                                          style="width:18%" name='btnDeleteWS' id="btnDeleteWS">
-                                    <span class='icon text-white-50'>
-                                     <i class='fas'>&#xf4fd; </i>
-                                    </span>
-                                   <!-- <span class='text'>SHOW</span> -->
-                                  </button>
-                                  &nbsp;
-                                  <button data-toggle="voidWS" title="VOID" data-role="voidWS" class="btn btn-danger btn-sm btn-circle"  
-                                          data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
-                                          style="width:18%" name='btnVoidWS' id="btnVoidWS">
-                                    <span class='icon text-white-50'>
-                                     <i class='fas'>&#xf410; </i>
-                                    </span>
-                                    <!-- <span class='text'>VOID</span> -->
-                                  </button>
-                                  &nbsp;
-                                  <button data-toggle="audittrailWS" title="AUDIT TRAIL"data-role="viewAuditTrailWS" class="btn btn-warning btn-sm btn-circle"  
-                                          data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>"
-                                          style="width:18%" name='btnAuditTrailWS' id="btnAuditTrailWS">
-                                    <span class='icon text-white-50'>
-                                     <i class='fas'>&#xf1da; </i>
-                                    </span>
-                                    <!-- <span class='text'>AUDIT</span> -->
-                                  </button>
+                                            ?>
+                                        </td>
+                                        <td style='display:none'>
+                                            <?php echo $result_workSched['log_start'];?>  <!-- column6 logStart-->
+                                        </td>
+                                        <td style='display:none'>
+                                            <?php echo $result_workSched['log_end'];?>    <!-- column7 logEnd-->
+                                        </td>
+                                        <!-- column8-->
+                                        <td> 
+                                              <?php 
+                                                    $logStart = new DateTime($result_workSched['log_start']);
+                                                    $logEnd = new DateTime($result_workSched['log_end']);
+                                                    echo $logStart->format('g:i A').'-'.$logEnd->format('g:i A'); ?>
+                                        </td>
+                                        
+                                        
+                                        <td>
+                                          <button data-toggle="editWS" title="EDIT" data-role="editWS" class="btn btn-success btn-sm btn-circle"  
+                                                  data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  style="width:18%" name='btnEditWS' id="btnEditWS">
+                                              <span class='icon text-white-50'>
+                                              <i class='far'>&#xf044;</i> 
+                                              </span>
+                                            <!-- <span class='text'>EDIT </span> -->
+                                          </button>
+                                          &nbsp; 
+                                          <button data-toggle="deleteWS" title="DELETE" data-role="deleteWS" class="btn btn-primary btn-sm btn-circle"  
+                                                  data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  style="width:18%" name='btnDeleteWS' id="btnDeleteWS">
+                                            <span class='icon text-white-50'>
+                                            <i class='fas'>&#xf4fd; </i>
+                                            </span>
+                                          <!-- <span class='text'>SHOW</span> -->
+                                          </button>
+                                          &nbsp;
+                                          <button data-toggle="voidWS" title="VOID" data-role="voidWS" class="btn btn-danger btn-sm btn-circle"  
+                                                  data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  style="width:18%" name='btnVoidWS' id="btnVoidWS">
+                                            <span class='icon text-white-50'>
+                                            <i class='fas'>&#xf410; </i>
+                                            </span>
+                                            <!-- <span class='text'>VOID</span> -->
+                                          </button>
+                                          &nbsp;
+                                          <button data-toggle="audittrailWS" title="AUDIT TRAIL"data-role="viewAuditTrailWS" class="btn btn-warning btn-sm btn-circle"  
+                                                  data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>"
+                                                  style="width:18%" name='btnAuditTrailWS' id="btnAuditTrailWS">
+                                            <span class='icon text-white-50'>
+                                            <i class='fas'>&#xf1da; </i>
+                                            </span>
+                                            <!-- <span class='text'>AUDIT</span> -->
+                                          </button>
 
-                                </td>
-                              </tr> 
-                      <?php }
+                                        </td>
+                                  </tr> 
+                      <?php   }
+                            }
+                            
                           }
-                          mysqli_close($con);
-                        } 
-                        else{
-                          echo "ERROR IN QUERY FOR DATATABLE";
-                        }
+                        }  
                       ?>
                     </tbody>
                   </table>
@@ -636,31 +631,30 @@
         );
 
 
-        //filter button click event
-        
-        $(document).on('click','button[data-role=filter]',function(){
-          if((dateStart == null || dateEnd == null))  {
+      //filter Date button click event
+      $(document).on('click','button[data-role=filter]',function(){
+          if((dateStart == null || dateEnd == null) && resultShowOption == 0)  {
             $('#alertNoselectedDates').modal('show');
           }
           else{
-              
+            
               $.ajax({
                    url: 'db/session_empid.php',
                    method: 'post',
                    data:{ empId:<?php echo $empID; ?>,
-                          filterDate:3,
+                          viewOption:'viewWorkSched',
+                          isDateFiltered:1, 
                           dateStart:dateStart,
-                          dateEnd:dateEnd},
+                          dateEnd:dateEnd
+                        },
                    success: function(data){
                      location.reload(true);
+                    
                    }
-              }); 
-              //waiting for sir ryan's response
-
-            
+              });
               
           }
-        }); 
+        });
         //*****END OF FILTER DATES */
 
       
@@ -683,14 +677,10 @@
         prevDate = moment(CurDate).subtract(3, 'month');
         prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
         
-       
-        <?php  
-              if($isDateFiltered != 3){
-        ?>
-                  SetDateFilter_DefaultValue(prevDate, CurDate);
-        <?php 
-              } 
-        ?>
+        
+        
+        SetDateFilterValue(prevDate, CurDate);
+      
           
                
         
@@ -710,11 +700,24 @@
         });
       }
 
-      function SetDateFilter_DefaultValue(fromDate, toDate){
-        $('#wsStartDate').val(fromDate);
-        $('#wsEndDate').val(toDate);
-        dateStart = $('#wsStartDate').val();
-        dateEnd = $('#wsEndDate').val();
+      function SetDateFilterValue(fromDate, toDate){
+
+        <?php 
+                if($isDateFiltered == 0){ 
+        ?>
+                      $('#wsStartDate').val(fromDate);
+                      $('#wsEndDate').val(toDate);
+        <?php   }
+                else{ 
+        ?>
+                      $('#wsStartDate').val(<?php echo $filter_dateStarted; ?>);
+                      $('#wsEndDate').val(<?php echo $filter_dateEnd; ?>);
+
+        <?php   }
+        ?>
+       
+                dateStart = $('#wsStartDate').val();
+                dateEnd = $('#wsEndDate').val();
 
       }
 

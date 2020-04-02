@@ -8,16 +8,6 @@
  // echo $GLOBAL['emp_isActive'];
 
 
-
-  /*old query
-    $query = "SELECT E.id_employee, E.rfid_no, concat(E.lname, ', ', E.fname, ' ', left(E.midname,1), '.') AS EName 
-                      FROM tbl_employee AS E
-                        INNER JOIN tbl_department AS D on D.id_department = E.id_department
-                        INNER JOIN tbl_program AS P on D.id_department = P.id_dept
-                        INNER JOIN tbl_userprogram AS UP on P.id_program = UP.id_program
-                      WHERE  UP.id_dtrviewer_user = $dtruser";
-  */
-
   //nov.19, 2019 updated query
   $query = "SELECT E.id_employee, E.rfid_no, concat(E.lname, ', ', E.fname, ' ', left(E.midname,1), '.') AS EName,
                     P.program_name
@@ -28,7 +18,6 @@
                       WHERE  UP.id_dtrviewer_user = $dtruser";
                       
     if($is_active==1){
-   // if($GLOBAL['emp_isActive']==1){
         $query .= " and E.is_active = 1";
     }
     else{
@@ -361,6 +350,8 @@
       var checkBox_status = <?php echo $is_active; ?>;
       var CurDate = null;
       var prevDate = null;
+      var ws_fromDate=null;
+      var ws_curDate = null;
       $('#dataTable_').DataTable({
         "oLanguage": {
                        "sSearch": "Search by Last Name:",
@@ -403,10 +394,16 @@
             method: 'post',
             data:{
               empId:empId, 
-              empName: employee
+              empName: employee,
+              viewOption: 'viewWorkSched',
+              isDateFiltered: 0,
+              dateStart:ws_fromDate,
+              dateEnd:ws_curDate
+              
 
             },
             success: function(data){
+              //alert(data);
               location.replace("workSched.php");  
             }
         });
@@ -481,37 +478,12 @@
         prevDate = moment(CurDate).subtract(1, 'month');
         prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
   
- 
-        /*
-        var GetDate;
-        var GetMonth;
-        var prevMonth;
+        ws_curDate = moment(fullDate).format('YYYY-MM-DD');
+        ws_fromDate = moment(CurDate).subtract(3, 'month');
+        ws_fromDate = moment(ws_fromDate).set('date',1).format('YYYY-MM-DD');
         
-
-        //to get the equivalent number of month
-        if(String(fullDate.getMonth()).length == 1){
-          GetMonth = fullDate.getMonth()+1;
-          prevMonth = "0" + fullDate.getMonth();
-          GetMonth = "0" + GetMonth;
-          
-        }
-        else{
-          GetMonth = fullDate.getMonth()+1;
-          prevMonth = fullDate.getMonth();
-        }
         
-        //to get the equivalent number of month
-        if(String(fullDate.getDate()).length == 1){
-         GetDate = fullDate.getDate();
-         GetDate = "0" + GetDate;
-        }
-        else{
-          GetDate = fullDate.getDate();
-        }
         
-        CurDate = fullDate.getFullYear() + "-" +  GetMonth + "-"  + GetDate;
-        prevDate = fullDate.getFullYear() + "-" +  prevMonth   + "-"  + "01";
-        */
        
       }
 

@@ -1,8 +1,10 @@
-<!-- FOR v.2.0.0
+<!-- FOR v.2.0.1
 - include the Work Schedule CRUD
   *index.php ---DataTable--Change nge Column Action into Logs
-  *index.php ---Add Column in DataTable, name it Schedules with corresponding button
+  *index.php ---Add Column in DataTable, name it S  chedules with corresponding button
   *add another page --WorkSchedule
+  *Another Feature added
+    -- date filter for workSchedule page is done
 -->
 
 

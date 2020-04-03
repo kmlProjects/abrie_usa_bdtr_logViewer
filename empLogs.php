@@ -122,6 +122,9 @@
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+  <!-- custom css created for modal by kmLaureta -->
+  <link href="css/modal.css" rel="stylesheet">
+
   <!-- Custom styles for dataTable  -->
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 
@@ -647,11 +650,11 @@
 
         <!-- Modal content-->
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Employee's Log Editor</h5 >
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <div class="modal-header mdl_header">
+            <h5 class="modal-title mdl_title">Employee's Log Editor</h5 >
+            <button type="button" class="close mdl_x_button" data-dismiss="modal">&times;</button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body mdl_body">
               <div class="row">
                 <div class="col-3">
                   <div id="editdivImage" >  </div> 
@@ -823,9 +826,9 @@
               </div>
               <!-- end of LOGOUT DETAILS -->
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer mdl_footer">
             <button type="button" class="btn btn-primary pull-right" name="update" id="btnUpdate">Update</button>
-            <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="btnClose_edit">Close</button>
+            <button type="button" class="btn btn-warning pull-left" data-dismiss="modal" id="btnClose_edit">Close</button>
           </div>
           </form>
         </div>
@@ -844,9 +847,9 @@
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Please enter dates to filter or select an option to show.</div>
+        <div class="modal-body mdl_body">Please enter dates to filter or select an option to show.</div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Okay</button>
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Okay</button>
         </div>
       </div>
     </div>
@@ -865,7 +868,7 @@
         </div>
         <div class="modal-body">Pleas enter valid date range!</div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Okay</button>
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Okay</button>
         </div>
       </div>
     </div>
@@ -887,7 +890,7 @@
         <p id="message"></p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Okay</button>
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Okay</button>
         </div>
       </div>
     </div>
@@ -927,13 +930,13 @@
   <div class="modal fade" id="UpdateForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h6 class="modal-title" id="exampleModalLabel">UPDATE CONFIRMATION</h6>
-          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+        <div class="modal-header mdl_header">
+          <h6 class="modal-title mdl_title" id="exampleModalLabel">UPDATE CONFIRMATION</h6>
+          <button class="close  mdl_x_button" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Please review the following changes for <label id="dateSched"></label> :<label id="dateSched"></label><br /> <br />
+        <div class="modal-body mdl_body">Please review the following changes for <label id="dateSched"></label> :<label id="dateSched"></label><br /> <br />
           <table class= "table table-bordered table-bordered table-sm" width="100%" cellspacing="0">
             <thead>
               <tr class="text-center">
@@ -971,10 +974,10 @@
           Reason for EDITING: &nbsp; <label id="lblReasonForEdit"></label>
         </div>
 
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal" id="updateConfirm_cancel">Cancel</button>
+        <div class="modal-footer mdl_footer">
+          <button class="btn btn-warning" type="button" data-dismiss="modal" id="updateConfirm_cancel">Cancel</button>
           <form>
-            <button type="button" name="logout" class="btn btn-danger" id="confirm_update" >Confirm</button>
+            <button type="button" name="logout" class="btn btn-success" id="confirm_update" >Confirm</button>
           </form>
         </div>
       </div>
@@ -1001,9 +1004,9 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Cancel</button>
           <form>
-            <button type="button" name="confirm" class="btn btn-danger" id="confirm_Void" >Confirm</button>
+            <button type="button" name="confirm" class="btn btn-success" id="confirm_Void" >Confirm</button>
           </form>
         </div>
       </div>
@@ -1023,11 +1026,8 @@
           </button>
         </div>
         <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <form action="logout.php">
-            <button type="submit" name="logout" class="btn btn-danger" >Logout</button>
-          </form>
+        <div class="modal-footer mdl_footer">
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
@@ -1471,8 +1471,10 @@
                    url: 'db/session_empid.php',
                    method: 'post',
                    data:{ empId:<?php echo $empID; ?>,
+                          viewOption: 'viewLogs',
                           showOption:resultShowOption, 
-                          filter:1},
+                          filter:1
+                        },
                    success: function(data){
                      location.reload(true);
                    }
@@ -1485,7 +1487,7 @@
                    method: 'post',
                    data:{ empId:<?php echo $empID; ?>,
                           showOption:resultShowOption, 
-
+                          viewOption: 'viewLogs',
                           filter:2,
                           dateStart:dateStart,
                           dateEnd:dateEnd},

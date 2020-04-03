@@ -9,14 +9,9 @@
   $isDateFiltered = $_SESSION['WS_DateFiltered'];
   $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
   $filter_dateEnd = "'" . $_SESSION['WS_def_endDate'] ."'";
-  
-  
-  
 
-  
-  //echo "<br />";
- // echo $isDateFiltered; 
-  
+  $roomCode_array = array();
+  $programName_array = array();
   
 
   $query = "SELECT 
@@ -35,7 +30,52 @@
              
            //    echo "<br />";        
            //  echo $query;
-    
+
+  //for list of room codes
+  $query_allRoomCode = "SELECT id_room, room_code FROM tbl_rooms";
+
+  //for list of program names
+  $query_allProgramList = "SELECT P.id_program, P.program_name 
+                              FROM  tbl_program AS P
+                                  INNER JOIN tbl_userprogram AS UP on UP.id_program = P.id_program
+                              WHERE UP.id_dtrviewer_user = $dtruser";
+  try{
+
+    $executeQuery_RoomCode = mysqli_query($con, $query_allRoomCode);
+    if(!$executeQuery_RoomCode){
+      //error
+    }
+    else{
+      $loop_counter = 0;
+      while($result=mysqli_fetch_assoc($executeQuery_RoomCode)){
+        $roomCode_array[$loop_counter] = array( "idRoom"=>$result['id_room'],
+                                                "roomCode"=>$result['room_code']
+  
+        );
+        $loop_counter++;
+      }
+    }
+
+    //for program names
+    $executeQuery_ProgramName = mysqli_query($con,$query_allProgramList);
+    if(!$executeQuery_ProgramName ){
+      //error
+    }
+    else{
+      $loop_counter = 0;
+      while($result = mysqli_fetch_assoc($executeQuery_ProgramName)){
+        $programName_array[$loop_counter] = array( "idProg"=> $result['id_program'],
+                                                    "progName"=> $result['program_name']
+
+        );
+        $loop_counter++;
+      }
+    }
+  }
+  catch(Exception $e){
+    echo 'Caught exception: ', $e->getMessage(), "\n";
+  }
+ 
 ?>
 
 <!DOCTYPE html>
@@ -73,16 +113,20 @@
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+  <!-- custom css created for modal by kmLaureta -->
+  <link href="css/modal.css" rel="stylesheet">
+
   <!-- Custom styles for dataTable  -->
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 
 <style>
+    
     input[type=checkbox] + label {
             color: #ccc;
             font-style: italic;
     } 
     input[type=checkbox]:checked + label {
-            color: #f00;
+            color: black;
             font-style: normal; 
     } 
 
@@ -108,6 +152,7 @@
       margin-left:185px;
       margin-top:-3px;
     }
+
     legend
 		{
 			font-size:14px;
@@ -120,6 +165,52 @@
       padding:0 10px; /* To give a bit of padding on the left and right */
       border-bottom:none;
 		} 
+
+    #mdl_legend_duration{
+      /*background-color: lightgray;*/
+      border: none;
+      font-size:18px;
+      width: 25%; 
+      padding:0 10px;
+      
+    }
+
+    #mdl_ws_body.label{
+        font-size: 8px;
+    }
+    #mdl_legend_Time{
+      /*background-color: lightgray;*/
+      border: none;
+      width: 34%; 
+      font-size:18px;
+    }
+
+    #mdl_legend_Day{
+      /*background-color: lightgray;*/
+      border: none;
+      width: 20%; 
+      font-size:18px;
+    }
+
+    #mdl_ws_details{
+      position:relative;
+      margin-top:-20px;
+    }
+
+    .mdl_chkboxes{
+      font-size:13px;
+    }
+    /*
+    #mdlAddEdit_WS{
+      position:relative;
+      margin-left:10px;
+      margin-top:10px;
+    }*/
+    
+
+
+
+
 </style>
 
 </head>
@@ -247,8 +338,6 @@
               <div class="card-header text-right">
                   <button style="font-size:20px"  id="btnAddWorkSched">Add Work Schedule <i class="material-icons">add_box</i></button>
               </div>
-              
-           
               <div class="card-body" id="divEmployeeLogs">
                 <div class="container" id="groupbox">
                   <div class="row"> <!-- row b4 dataTable -->
@@ -323,6 +412,7 @@
                       </tr>
                     </thead>
                     <tfoot >
+
                     </tfoot>
                     <tbody class="text-nowrap">
                       <?php
@@ -539,6 +629,233 @@
     <i class="fas fa-angle-up"></i>
   </a>
 
+  <!-- Modal for Add/Edit Form --> <!-- modal-dialog-centered -->
+  <div class="modal fade" id="mdlAddEdit_WS" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header mdl_header">
+          <h5 class="modal-title mdl_title">Add Work Schedule</h5>
+          <button class="close mdl_x_button" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body mdl_body">
+            <div class="card" id="mdl_ws_body">
+              <div class="card-body">
+                  <!--============================= NAME & WORK NAME ====================================-->
+                  <div class="form-row">
+                    <div class="col-3 text-right">
+                      <label class="label text-dark"><strong>Employee Name:</strong> </label>
+                    </div>
+                    <div class="col-9">
+                      <label class="label" id="lblEmpName" style="color:red;font-size:25px;margin-top:-5px"></label>
+                    </div>
+                  </div>
+                  <div class ="form-row">
+                    <div class="col-3 text-right">
+                        <label class="label text-dark"><strong>Work Name:</strong> </label>
+                    </div>
+                    <div class="col-9">
+                        <input class='form-control' id='txtWorkName'  type='text'/>  
+                    </div>
+                  </div>
+                  <!--=======================================================================================-->
+                  <br />
+                  
+                  <!---============================ Room Code & Program ====================================== -->
+                  <div class="form-row">
+                      <div class="col-5">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="roomCodeList">Room Code:</label>
+                            </div>
+                            <select id="roomCodeList" class="custom-select">
+                              <option value="0" disabled selected>Pick a room code..
+                              </option>
+                                <?php
+                                    $roomCode_array_count = count($roomCode_array);
+                                    for($x=0; $x<$roomCode_array_count; $x++){
+                                              echo "<option";
+                                                      echo "value= $roomCode_array[$x]['idRoom']";
+                                              echo "/>";
+                                                      echo $roomCode_array[$x]['roomCode'];
+                                              echo "</option>";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                      </div>
+                      <div class="col-7">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <label class="input-group-text" for="programNameList">Program:</label>
+                          </div>
+                          <select id="programNameList" class="custom-select">
+                                <option value="0" disabled selected>Pick a program name..
+                                </option> 
+                                <?php
+                                    $progNam_array_count = count($programName_array);
+                                    for($y=0; $y<$progNam_array_count; $y++){
+                                          echo "<option";
+                                                    echo "value= $programName_array[$y]['idProg']";
+                                          echo "/>";
+                                                    echo $programName_array[$y]['progName'];
+                                          echo "</option>";
+                                    }
+                                ?>
+                          </select>
+                        </div>
+                      </div>
+                  </div>
+                   <!--=======================================================================================-->
+
+                  <br />
+                  <!--====================================== DETAILS =========================================================-->                
+                  <div class="form-row" id="mdl_ws_details">
+                       <!--====================================== DATE AND TIME DURATION =========================================================-->   
+                      <div class="col-7">
+                          <!--====================================== DATE =========================================================--> 
+                          <div class="form-row">
+                              <fieldset class="border p-2 col-12 card" >
+                                  <legend id="mdl_legend_duration"><h6><strong>Duration</strong></h6></legend>
+                                  <div class="form-row"  sytle="postion:relative;margin-top:-50px">
+                                    <div class="col-6">
+                                      <label class="label" for="mdl_addEdit_durationFrom">From:</label>
+                                      <input class='form-control' id='mdl_addEdit_durationFrom' type='date'/> 
+                                    </div>
+                                    <div class="col-6">
+                                      <label class="label" for="mdl_addEdit_durationFrom">To:</label>
+                                      <input class='form-control' id='mdl_addEdit_durationTo' type='date'/> 
+                                    </div>
+                                  </div>
+                                  <div class="form-row" style="postion:relative;margin-top:10px">
+                                      <div class="col-12 text-right">
+                                          <input type='checkbox'  data-role='mdl_addEdit_durationPerpetual' name='chkBx_durationPerpetual' id='chkdurationPerpetual'>
+                                          <label class='custom-label' style="postion:relative;margin-right:10px"><strong>Perpetual</strong></label>
+                                      </div>
+                                  </div>
+                              </fieldset>
+                          </div>
+                          <!--=======================================================================================-->
+                          <br />
+                          <!--====================================== TIME=========================================================--> 
+                          <div class="form-row" style="position:relative;margin-top:-20px">
+                              <fieldset class="border p-2 col-12 card">
+                                  <legend id="mdl_legend_Time"><h6><strong>Login/Logout</strong></h6></legend>
+                                  <div class="form-row">
+                                    <div class="col-6">
+                                          <label class="label" for="mdl_addEdit_startTime">Start Time:</label>
+                                          <input class='form-control' id='mdl_addEdit_startTime' type='time'/> 
+                                    </div>
+                                    <div class="col-6">
+                                          <label class="label" for="mdl_addEdit_endTime">End Time:</label>
+                                          <input class='form-control' id='mdl_addEdit_endTime' type='time'/> 
+                                    </div> 
+                                  </div>
+                                  <div class="form-row">
+                                        <div class="col-12 text-right" style="position:realative;margin-right:10px;margin-top:10px">
+                                                <input type='checkbox'  data-role='mdl_addEdit_isSunday' name='chkBx_nextDayLogout' id='chkNextDayLogout'>      
+                                                <label class='custom-label mdl_chkboxes'><strong>Next Day Log Out</strong></label>
+                                        </div>
+                                  </div>
+                                  
+                              </fieldset>
+                          </div>
+                          <!--=======================================================================================-->
+                      </div>
+                      <!--=======================================================================================-->     
+
+                      <!--====================================== DAYS =========================================================--> 
+                      <div class="col-5" >        
+                           
+                                <fieldset class="border p-2 col-12 card" style="height:100%" >
+                                    <legend id="mdl_legend_Day"><h6><strong>Day</strong></h6></legend>
+                                    <div class="form-row">
+                                        <div class="col-12">
+                                          <div class="card" style="height:100%">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <button id="btnWeekDays" type="button" class="btn btn-success btn-md" style="width:100%" >Weekdays</button>
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-row">
+                                                    <div class="col-6">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isSunday' name='chkBx_isSunday' id='chkIsSunday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Sunday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isMonday' name='chkBx_isMonday' id='chkIsMonday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Monday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isTuesday' name='chkBx_isTueday' id='chkIsTuesday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Tuesday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isWednesday' name='chkBx_isWednesday' id='chkIsWednesday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Wednesday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isThursday' name='chkBx_isThursday' id='chkIsThursday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Thursday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isFriday' name='chkBx_isFriday' id='chkIsFriday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Friday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <input type='checkbox'  data-role='mdl_addEdit_isSaturday' name='chkBx_isSaturday' id='chkIsSaturday'>
+                                                                <label class='custom-label mdl_chkboxes'><strong>Saturday</strong></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                
+
+                                            </div>
+                                          </div> 
+                                        </div>
+                                    </div>            
+                                </fieldset>
+                            
+                          
+                      </div>
+                  </div>
+                   <!--=======================================================================================-->
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer mdl_footer">
+          <button class="btn btn-primary" type="button" data-dismiss="modal">Submit</button>
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal  No selected Dates-->     
+
+  
   <!-- Modal for No selected Dates from filter command -->
   <div class="modal fade" id="alertNoselectedDates" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -605,6 +922,9 @@
       var CurDate = null;
       var prevDate = null;
       var dateStart, dateEnd;
+      var employeeName; 
+
+      employeeName = $('#empName').text();
 
       $('#dataTable_workSchedule').DataTable({
         "oLanguage": {
@@ -631,13 +951,12 @@
         );
 
 
-      //filter Date button click event
-      $(document).on('click','button[data-role=filter]',function(){
+        //filter Date button click event
+        $(document).on('click','button[data-role=filter]',function(){
           if((dateStart == null || dateEnd == null) && resultShowOption == 0)  {
             $('#alertNoselectedDates').modal('show');
           }
           else{
-            
               $.ajax({
                    url: 'db/session_empid.php',
                    method: 'post',
@@ -655,9 +974,36 @@
               
           }
         });
-        //*****END OF FILTER DATES */
+       //*****END OF FILTER DATES */
 
       
+      $('#btnAddWorkSched').click(function(){
+        
+       
+        $('#lblEmpName').text(employeeName);
+        $('#mdlAddEdit_WS').modal('show');
+        $('.modal-title').text("Add Work Schedule");
+      });
+
+      $('#mdlAddEdit_WS').on('shown.bs.modal', function (){
+          clearWSForm()
+          $('#txtWorkName').focus();
+          $('#mdl_addEdit_durationFrom').val(CurDate);
+      });
+
+      $('#mdlAddEdit_WS').on('hidden.bs.modal', function (){
+        clearWSForm();
+      });
+
+
+      $('#btnWeekDays').click(function(){
+        $('#chkIsMonday').prop("checked", true);
+        $('#chkIsTuesday').prop("checked", true);
+        $('#chkIsWednesday').prop("checked", true);
+        $('#chkIsThursday').prop("checked", true);
+        $('#chkIsFriday').prop("checked", true);
+      });
+
       function getUserPic(){
         $.ajax({
             url: 'db/dbEmpImage.php',
@@ -677,14 +1023,7 @@
         prevDate = moment(CurDate).subtract(3, 'month');
         prevDate = moment(prevDate).set('date',1).format('YYYY-MM-DD');
         
-        
-        
         SetDateFilterValue(prevDate, CurDate);
-      
-          
-               
-        
-       
        
       }
 
@@ -718,6 +1057,28 @@
        
                 dateStart = $('#wsStartDate').val();
                 dateEnd = $('#wsEndDate').val();
+
+      }
+
+      function clearWSForm(){
+          $('#txtWorkName').val('');
+          $('#roomCodeList').val(0);
+          $('#programNameList').val(0);
+          $('#mdl_addEdit_durationFrom').val(CurDate);
+          $('#mdl_addEdit_durationTo').val('');
+          $('#chkdurationPerpetual').prop("checked", false);
+          $('#mdl_addEdit_startTime').val('');
+          $('#mdl_addEdit_endTime').val('');
+          $('#chkNextDayLogout').prop("checked", false);
+          $('#chkIsSunday').prop("checked", false);
+          $('#chkIsMonday').prop("checked", false);
+          $('#chkIsTuesday').prop("checked", false);
+          $('#chkIsWednesday').prop("checked", false);
+          $('#chkIsThursday').prop("checked", false);
+          $('#chkIsFriday').prop("checked", false);
+          $('#chkIsSaturday').prop("checked", false);
+
+
 
       }
 

@@ -1,10 +1,14 @@
-<!-- FOR v.2.0.1
+<!-- FOR v.2.0.2
 - include the Work Schedule CRUD
   *index.php ---DataTable--Change nge Column Action into Logs
   *index.php ---Add Column in DataTable, name it S  chedules with corresponding button
   *add another page --WorkSchedule
+  *date filter for workSchedule page 
   *Another Feature added
-    -- date filter for workSchedule page is done
+    --modal form template for add function of work schedule
+    --default setting of the modal upon add feature
+    --css for modal applied to all modal
+    
 -->
 
 
@@ -49,7 +53,7 @@
             <!-- 
               
             -->
-           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.1</span></label> </h1>
+           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.2</span></label> </h1>
     </div>
 
     <!-- Outer Row -->

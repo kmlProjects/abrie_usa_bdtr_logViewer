@@ -3,6 +3,7 @@
        session_start();
        $_SESSION['empId'] = $_POST['empId'];
        
+       
        if($_POST['viewOption']=='viewLogs'){
              
               $_SESSION['showOption_logs'] = $_POST['showOption']; 

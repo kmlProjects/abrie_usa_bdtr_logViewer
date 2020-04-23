@@ -52,7 +52,7 @@ if($con)
 						mysqli_stmt_store_result($stmt);
 				
                 		if(mysqli_stmt_num_rows($stmt)<=0){
-                    		echo "01";
+                    		echo "01"; //error
                 		}
                 		else if (mysqli_stmt_num_rows($stmt)==1){
                     		//bind the result

@@ -398,12 +398,14 @@
               viewOption: 'viewWorkSched',
               isDateFiltered: 0,
               dateStart:ws_fromDate,
-              dateEnd:ws_curDate
+              dateEnd:ws_curDate,
+              hideExpiredSched: 'yes',
+              calledFrom: 'index.php'
               
 
             },
             success: function(data){
-              //alert(data);
+            //  alert(data);
               location.replace("workSched.php");  
             }
         });
@@ -412,7 +414,6 @@
       //logs view
       $(document).on('click','button[data-role=view]',function(){  
         var empId = $(this).data('empid');
-        
         
         $.post("db/session_empid.php",{
                                           viewOption:'viewLogs',
@@ -431,8 +432,6 @@
 
 
       $(document).on('click','input:checkbox[data-role=emplist_toggle]',function(){   
-       
-        
         if(checkBox_status==1){
           var from = 'index0';
             $.ajax({

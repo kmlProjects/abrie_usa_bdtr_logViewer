@@ -1,13 +1,18 @@
-<!-- FOR v.2.0.2
+<!-- FOR v.2.0.3
 - include the Work Schedule CRUD
   *index.php ---DataTable--Change nge Column Action into Logs
   *index.php ---Add Column in DataTable, name it S  chedules with corresponding button
   *add another page --WorkSchedule
   *date filter for workSchedule page 
+  *modal form template for add function of work schedule
+  *default setting of the modal upon add feature
+  *css for modal applied to all modal
   *Another Feature added
-    --modal form template for add function of work schedule
-    --default setting of the modal upon add feature
-    --css for modal applied to all modal
+  --add checkbox 'hide expired schedule under the table and its function"
+      --default Settings(No filder Date & Hide Expired Schedules)
+      -- No filter Date & Show Epired Schedules
+      -- With Filter
+    
     
 -->
 
@@ -53,7 +58,7 @@
             <!-- 
               
             -->
-           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.2</span></label> </h1>
+           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.3</span></label> </h1>
     </div>
 
     <!-- Outer Row -->

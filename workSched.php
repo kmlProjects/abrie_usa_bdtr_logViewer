@@ -6,29 +6,76 @@
   $dtruser = $_SESSION['login_userId'];
   $empID = $_SESSION['empId'];
   $employeeName = $_SESSION['workSched_empName'];
-  $isDateFiltered = $_SESSION['WS_DateFiltered'];
-  $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
-  $filter_dateEnd = "'" . $_SESSION['WS_def_endDate'] ."'";
 
+  $isHideExpiredSched_view = $_SESSION['WS_hideExpiredSched'];
+  
+  $isDateFiltered = $_SESSION['WS_DateFiltered'];
+  //echo $isHideExpiredSched_view;
+  //echo "<br/>";
   $roomCode_array = array();
   $programName_array = array();
-  
 
-  $query = "SELECT 
-                      WS.id_work_schedule,
-                      E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
-                      WS.work_name, R.room_code,
-                      DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
-                      WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
-                      WS.log_start, WS.log_end, WS.is_voided
-              FROM tbl_work_schedule AS WS
-                  INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
-                  INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
-                  INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
-              WHERE E.id_employee = $empID AND WS.duration_from >= $filter_dateStarted AND  WS.duration_to <= $filter_dateEnd
-              ORDER BY WS.work_name ASC";
+
+  //worksched.php page scenarios
+
+      //with filter dates activated
+      if($isDateFiltered == 1){
+            $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
+            $filter_dateEnd = "'" . $_SESSION['WS_def_endDate'] ."'";
+
+            $query = "SELECT 
+                                WS.id_work_schedule,
+                                E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
+                                WS.work_name, R.room_code,
+                                DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
+                                WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
+                                WS.log_start, WS.log_end, WS.is_voided
+                          FROM tbl_work_schedule AS WS
+                            INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
+                            INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
+                            INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
+                          WHERE E.id_employee = $empID AND WS.duration_from >= $filter_dateStarted AND  WS.duration_to <= $filter_dateEnd
+                          ORDER BY WS.work_name ASC";
+      }
+      else{
+        
+          //Default settings (No filter & hide expired dates)
+          if($isHideExpiredSched_view=='yes'){
+            $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
+            $query = "SELECT 
+                                WS.id_work_schedule,
+                                E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
+                                WS.work_name, R.room_code,
+                                DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
+                                WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
+                                WS.log_start, WS.log_end, WS.is_voided
+                          FROM tbl_work_schedule AS WS
+                              INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
+                              INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
+                              INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
+                          WHERE E.id_employee = $empID AND WS.duration_from >= $filter_dateStarted AND  WS.duration_to <= NOW()
+                          ORDER BY WS.work_name ASC";
+          }
+          else{ // No filter but show expired schedules
+            $query = "SELECT 
+                                WS.id_work_schedule,
+                                E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
+                                WS.work_name, R.room_code,
+                                DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
+                                WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
+                                WS.log_start, WS.log_end, WS.is_voided
+                          FROM tbl_work_schedule AS WS
+                            INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
+                            INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
+                            INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
+                          WHERE E.id_employee = $empID AND  WS.duration_to <= NOW()
+                          ORDER BY WS.work_name ASC";
+          }          
+      }
+  
+ 
              
-           //    echo "<br />";        
+            //  echo "<br />";        
            //  echo $query;
 
   //for list of room codes
@@ -412,7 +459,20 @@
                       </tr>
                     </thead>
                     <tfoot >
-
+                        <tr class='text-danger'>
+                            <th colspan='10'>
+                                <div class='custom-control custom-checkbox small text-right text-danger' style="position:relative;margin-top:10px">
+                                        <input type='checkbox'  data-role='ws_hideExpired' name='chkBx_empAll' id='chkHideExpired'
+                                          <?php 
+                                              if($isHideExpiredSched_view=='yes'){
+                                                  echo 'checked';
+                                              }   
+                                          ?>
+                                          >
+                                        <label class='custom-label'><strong>Hide Expired Work Schedules</strong></label>
+                                </div>
+                            </th>                   
+                        </tr> 
                     </tfoot>
                     <tbody class="text-nowrap">
                       <?php
@@ -936,6 +996,45 @@
       getUserPic();
       loadEmpImage(); 
       GetCurrentDate();
+     
+
+        $(document).on('click','input:checkbox[data-role=ws_hideExpired]',function(){
+
+            //check current status after it was selected
+            if($(this).prop("checked")==true){ 
+                $.ajax({
+                    url: 'db/session_empid.php',
+                    method: 'post',
+                    data:{
+                          viewOption: 'viewWorkSched',
+                          hideExpiredSched: 'yes',
+                          isDateFiltered: 0,
+                          calledFrom: 'worksched.php'
+                    },
+                    success: function(data){
+                      location.reload(true);
+                    }
+                });
+            }
+            else{
+              $.ajax({
+                    url: 'db/session_empid.php',
+                    method: 'post',
+                    data:{
+                          viewOption: 'viewWorkSched',
+                          hideExpiredSched: 'no',
+                          isDateFiltered: 0,
+                          calledFrom: 'worksched.php'
+                    },
+                    success: function(data){
+                      location.reload(true);
+                    }
+                });
+            }
+           
+       
+
+        });
 
        //*******FILTER DATES */
         //to get StartDate value for filtering records
@@ -957,20 +1056,36 @@
             $('#alertNoselectedDates').modal('show');
           }
           else{
+
+              //determine the endDate if it is less than current date 
+              var hideExpiredSched_status; 
+              if(dateEnd < CurDate){
+                hideExpiredSched_status = 'no';
+              }
+              else{
+                hideExpiredSched_status = 'yes';
+              }
+              
               $.ajax({
                    url: 'db/session_empid.php',
                    method: 'post',
                    data:{ empId:<?php echo $empID; ?>,
+                          calledFrom: 'worksched.php',
                           viewOption:'viewWorkSched',
+                          hideExpiredSched: hideExpiredSched_status,
                           isDateFiltered:1, 
                           dateStart:dateStart,
-                          dateEnd:dateEnd
+                          dateEnd:dateEnd,
+                          
                         },
                    success: function(data){
                      location.reload(true);
+                     //SetDateFilterValue(prevDate, CurDate);
                     
                    }
               });
+              
+              
               
           }
         });
@@ -1042,19 +1157,24 @@
       function SetDateFilterValue(fromDate, toDate){
 
         <?php 
-                if($isDateFiltered == 0){ 
+                if(($isDateFiltered == 0) && ($isHideExpiredSched_view=='yes')){
         ?>
                       $('#wsStartDate').val(fromDate);
                       $('#wsEndDate').val(toDate);
         <?php   }
-                else{ 
+                else if(($isDateFiltered == 0) && ($isHideExpiredSched_view=='no')){ 
+        ?>
+                      $('#wsStartDate').val('');
+                      $('#wsEndDate').val('');
+        <?php   }
+               
+                else{
         ?>
                       $('#wsStartDate').val(<?php echo $filter_dateStarted; ?>);
                       $('#wsEndDate').val(<?php echo $filter_dateEnd; ?>);
-
-        <?php   }
+        <?php          
+                }
         ?>
-       
                 dateStart = $('#wsStartDate').val();
                 dateEnd = $('#wsEndDate').val();
 
@@ -1081,6 +1201,8 @@
 
 
       }
+
+     
 
       
     });

@@ -34,7 +34,8 @@ if($con)
 				try{
 
 					$query = "SELECT U.id_dtrviewer_user, U.dtrviewer_username, U.id_employee,
-								concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) AS loginUser
+								concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) AS loginUser,
+								E.id_department
 									FROM tbl_dtrviewer_user AS U
 										INNER JOIN tbl_employee AS E on E.id_employee = U.id_employee
 									WHERE U.dtrviewer_username = ? AND U.dtrviewer_password = ?	 and U.is_active = 1;";
@@ -56,12 +57,13 @@ if($con)
                 		}
                 		else if (mysqli_stmt_num_rows($stmt)==1){
                     		//bind the result
-							mysqli_stmt_bind_result($stmt,$result_dtrviewerID, $resultUserName, $result_idEmp, $result_realName);
+							mysqli_stmt_bind_result($stmt,$result_dtrviewerID, $resultUserName, $result_idEmp, $result_realName, $result_userDeptID);
                     		session_start();
                     		while (mysqli_stmt_fetch($stmt)) {
 								$_SESSION['empName'] = $result_realName;
 								$_SESSION['username'] = $resultUserName;
 								$_SESSION['login_empId'] = $result_idEmp;
+								$_SESSION['login_deptId'] = $result_userDeptID;
 								$_SESSION['login_userId'] = $result_dtrviewerID;
 								$_SESSION['emp_isActive'] = 1;
                     		}

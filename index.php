@@ -10,7 +10,7 @@
 
   //nov.19, 2019 updated query
   $query = "SELECT E.id_employee, E.rfid_no, concat(E.lname, ', ', E.fname, ' ', left(E.midname,1), '.') AS EName,
-                    P.program_name
+                    E.id_department, P.program_name
                       FROM tbl_employee AS E
                         INNER JOIN tbl_department AS D on D.id_department = E.id_department
                         INNER JOIN tbl_program AS P on D.id_department = P.id_dept
@@ -207,6 +207,7 @@
                                    <thead class='text-danger text-center'>
                                       <tr>
                                         <th><strong>Employee Name</strong></th>
+                                        <th style='display:none'>deptId</th>
                                         <th><strong>RFID No.</strong></th>
                                         <th><strong>Program Name</strong></th>
                                         <th><strong>Schedules</strong></th>
@@ -215,7 +216,7 @@
                                     </thead>
                                     <tfoot>
                                       <tr class='text-danger'>
-                                        <th colspan='5'>
+                                        <th colspan='6'>
                                           <div class='custom-control custom-checkbox small text-right text-danger'>
                                             <input type='checkbox'  data-role='emplist_toggle' name='chkBx_empAll' id='chkEmpNotAll' value='Show Active Employees Only'>
                                             <label class='custom-label'><strong>Show Active Employees Only</strong></label>
@@ -229,6 +230,7 @@
 
                                           echo "<tr id=".$row['id_employee'].">";
                                             echo "<td data-target='eName'>".$row['EName']."</td>";
+                                            echo "<td style='display:none'>".$row['id_department']."</td>";
                                             echo "<td data-target='rfidNo'>".$row['rfid_no']."</td>";
                                             echo "<td data-target='progName'>".$row['program_name']."</td>";
                                             echo "<td id='btnViewSched'>";
@@ -387,13 +389,15 @@
       $(document).on('click','button[data-role=viewSched]',function(){
         var empId = $(this).data('empid');
         var current_row = $(this).closest('tr');
+        var empDeptId = current_row.find('td:eq(1)').text(); //column 3
         var employee = current_row.find('td:eq(0)').text(); //column 3
-
+        
         $.ajax({
             url:'db/session_empid.php',
             method: 'post',
             data:{
               empId:empId, 
+              empDeptId: empDeptId, 
               empName: employee,
               viewOption: 'viewWorkSched',
               isDateFiltered: 0,
@@ -405,7 +409,7 @@
 
             },
             success: function(data){
-            //  alert(data);
+           
               location.replace("workSched.php");  
             }
         });

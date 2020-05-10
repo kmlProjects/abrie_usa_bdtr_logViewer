@@ -18,7 +18,8 @@
              // $hideExpiredSched = $_POST['hideExpiredSched'];
 
              $calledFrom = $_POST['calledFrom'];
-
+            
+              
              if($calledFrom== 'index.php'){
                      $_SESSION['empId'] = $_POST['empId'];
                      $_SESSION['workSched_empName'] = $_POST['empName'];
@@ -26,15 +27,19 @@
                      $_SESSION['WS_def_endDate'] = $_POST['dateEnd'];
                      $_SESSION['WS_hideExpiredSched'] = $_POST['hideExpiredSched'];
                      $_SESSION['WS_DateFiltered'] = $_POST['isDateFiltered'];
+                     $_SESSION['emp_deptID'] = $_POST['empDeptId'];
              }
              else{ //worksched.php
                      $_SESSION['WS_hideExpiredSched'] = $_POST['hideExpiredSched'];
                      $_SESSION['WS_DateFiltered'] = $_POST['isDateFiltered'];
-
+                    
+                     
                      if($_POST['isDateFiltered'] == 1){
                             $_SESSION['WS_def_startDate'] = $_POST['dateStart'];
                             $_SESSION['WS_def_endDate'] = $_POST['dateEnd'];
                      }
+
+                    
 
              }
 

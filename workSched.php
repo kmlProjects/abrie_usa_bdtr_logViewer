@@ -7,6 +7,7 @@
   $empID = $_SESSION['empId'];
   $employeeName = $_SESSION['workSched_empName'];
 
+
   $isHideExpiredSched_view = $_SESSION['WS_hideExpiredSched'];
   
   $isDateFiltered = $_SESSION['WS_DateFiltered'];
@@ -41,7 +42,7 @@
         
           //Default settings (No filter & hide expired dates)
           if($isHideExpiredSched_view=='yes'){
-            $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
+           // $filter_dateStarted = "'" . $_SESSION['WS_def_startDate'] ."'";
             $query = "SELECT 
                                 WS.id_work_schedule,
                                 E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
@@ -53,7 +54,7 @@
                               INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                               INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
                               INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
-                          WHERE E.id_employee = $empID AND WS.duration_from >= $filter_dateStarted AND  WS.duration_to <= NOW()
+                          WHERE E.id_employee = $empID AND  WS.duration_to > NOW()
                           ORDER BY WS.work_name ASC";
           }
           else{ // No filter but show expired schedules
@@ -75,11 +76,11 @@
   
  
              
-            //  echo "<br />";        
-           //  echo $query;
+             // echo "<br />";        
+             // echo $query;
 
   //for list of room codes
-  $query_allRoomCode = "SELECT id_room, room_code FROM tbl_rooms";
+  $query_allRoomCode = "SELECT id_room, room_code, id_terminal FROM tbl_rooms";
 
   //for list of program names
   $query_allProgramList = "SELECT P.id_program, P.program_name 
@@ -96,7 +97,8 @@
       $loop_counter = 0;
       while($result=mysqli_fetch_assoc($executeQuery_RoomCode)){
         $roomCode_array[$loop_counter] = array( "idRoom"=>$result['id_room'],
-                                                "roomCode"=>$result['room_code']
+                                                "roomCode"=>$result['room_code'],
+                                                "idTerminal"=>$result['id_terminal']
   
         );
         $loop_counter++;
@@ -650,7 +652,8 @@
                             }
                             
                           }
-                        }  
+                        } 
+                        mysqli_close($con);
                       ?>
                     </tbody>
                   </table>
@@ -735,10 +738,9 @@
                                 <?php
                                     $roomCode_array_count = count($roomCode_array);
                                     for($x=0; $x<$roomCode_array_count; $x++){
-                                              echo "<option";
-                                                      echo "value= $roomCode_array[$x]['idRoom']";
-                                              echo "/>";
-                                                      echo $roomCode_array[$x]['roomCode'];
+                                              $idTerminal = $roomCode_array[$x]['idTerminal'];
+                                              echo "<option value= $idTerminal />";
+                                                    echo $roomCode_array[$x]['roomCode'];
                                               echo "</option>";
                                     }
                                 ?>
@@ -756,9 +758,8 @@
                                 <?php
                                     $progNam_array_count = count($programName_array);
                                     for($y=0; $y<$progNam_array_count; $y++){
-                                          echo "<option";
-                                                    echo "value= $programName_array[$y]['idProg']";
-                                          echo "/>";
+                                           $valueProgram = $programName_array[$y]['idProg'];
+                                          echo "<option value= $valueProgram />";
                                                     echo $programName_array[$y]['progName'];
                                           echo "</option>";
                                     }
@@ -783,8 +784,8 @@
                                       <label class="label" for="mdl_addEdit_durationFrom">From:</label>
                                       <input class='form-control' id='mdl_addEdit_durationFrom' type='date'/> 
                                     </div>
-                                    <div class="col-6">
-                                      <label class="label" for="mdl_addEdit_durationFrom">To:</label>
+                                    <div class="col-6" id="divDurationTo">
+                                      <label class="label" for="mdl_addEdit_durationTo">To:</label>
                                       <input class='form-control' id='mdl_addEdit_durationTo' type='date'/> 
                                     </div>
                                   </div>
@@ -890,9 +891,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
-                                                
-
                                             </div>
                                           </div> 
                                         </div>
@@ -907,7 +905,7 @@
             </div>
         </div>
         <div class="modal-footer mdl_footer">
-          <button class="btn btn-primary" type="button" data-dismiss="modal">Submit</button>
+          <button class="btn btn-primary" type="button" data-dismiss="modal" id="btnWorkSched">Sample</button>
           <button class="btn btn-warning" type="button" data-dismiss="modal">Cancel</button>
         </div>
       </div>
@@ -983,6 +981,25 @@
       var prevDate = null;
       var dateStart, dateEnd;
       var employeeName; 
+      var workName,roomCode, roomCode, programId;
+      var durationFrom, durationTo, chkPerpetual;
+      var startTime, endTime, chkNextDayLogOut;
+      var idTerminal;
+      var chkSun, chkMon, chkTue, chkWed, chkThu, chkFri, chkSat, daysHadSelected;
+      var phpMode;
+      var update_last, update_next;
+
+      daysHadSelected = 0;
+      chkPerpetual = 0;
+      chkNextDayLogOut =0;
+      chkSun = 0;
+      chkMon = 0;
+      chkTue = 0; 
+      chkWed = 0; 
+      chkThu = 0; 
+      chkFri = 0;
+      chkSat = 0;
+      
 
       employeeName = $('#empName').text();
 
@@ -1098,18 +1115,127 @@
         $('#lblEmpName').text(employeeName);
         $('#mdlAddEdit_WS').modal('show');
         $('.modal-title').text("Add Work Schedule");
+        phpMode = 'add';
       });
 
       $('#mdlAddEdit_WS').on('shown.bs.modal', function (){
           clearWSForm()
           $('#txtWorkName').focus();
           $('#mdl_addEdit_durationFrom').val(CurDate);
+          durationFrom = $('#mdl_addEdit_durationFrom').val();
+          if(phpMode == 'add'){
+            $('#btnWorkSched').html('Submit');
+          }
+          else{
+            $('#btnWorkSched').html('Update');
+          }
+          btnWorkSched_Settings();
       });
 
       $('#mdlAddEdit_WS').on('hidden.bs.modal', function (){
         clearWSForm();
       });
 
+      //modal elements events
+      $('#txtWorkName').change(function(){
+        workName = $(this).val();
+        btnWorkSched_Settings();
+      });
+      
+      $('#roomCodeList').change(function(){
+        roomCode = $('#roomCodeList option:selected').text();
+        //intended for ID TERMINAL
+        idTerminal = $('#roomCodeList option:selected').val();  
+        btnWorkSched_Settings();
+      });
+
+      $('#programNameList').change(function(){
+        programId = $('#programNameList option:selected').val();
+        btnWorkSched_Settings();
+      });
+
+      $('#mdl_addEdit_durationFrom').change(function(){
+        durationFrom = $(this).val();
+        btnWorkSched_Settings();
+      });
+      
+      $('#mdl_addEdit_durationTo').change(function(){
+        durationTo = $(this).val();
+        if(durationTo < durationFrom ){
+          alert("Selected Date must not earlier than Duration From Date!");
+          durationTo = null;
+          $(this).val('');
+          $(this).focus();
+        }
+        else{
+          btnWorkSched_Settings();
+        }
+        
+      });
+
+      $('#chkdurationPerpetual').change(function(){
+        if($(this).prop("checked")==true){
+          chkPerpetual = 1; 
+          $('#mdl_addEdit_durationTo').val('2100-12-31');
+          durationTo =  $('#mdl_addEdit_durationTo').val();
+          $('#divDurationTo').hide();
+        }
+        else{
+          chkPerpetual = 0;
+          $('#mdl_addEdit_durationTo').val('');
+          $('#divDurationTo').show();
+          durationTo='';
+
+        }
+        
+        btnWorkSched_Settings();
+      });
+
+      $('#mdl_addEdit_startTime').change(function(){
+        startTime = $(this).val();
+        btnWorkSched_Settings();
+      });
+      
+      $('#mdl_addEdit_endTime').change(function(){
+        endTime = $(this).val();
+        
+
+        if( chkNextDayLogOut == 0){
+          if(endTime < startTime){
+            alert("Invalid End Time value. It must not be earlier than Start Time");
+            endTime = null;
+            $(this).val('');
+            $(this).focus();
+          }
+          else{
+            btnWorkSched_Settings();
+          }
+        }
+        else{
+          btnWorkSched_Settings();
+        }
+        
+       
+
+        
+      });
+
+      $('#chkNextDayLogout').change(function(){
+        if($(this).prop("checked")==true){
+          chkNextDayLogOut = 1;
+          btnWorkSched_Settings();
+        }
+        else{
+          chkNextDayLogOut = 0;
+          if(endTime < startTime){
+            alert("Invalid End Time value. It must not be earlier than Start Time");
+            endTime = null;
+            $('#mdl_addEdit_endTime').val('');
+            $('#mdl_addEdit_endTime').focus();
+          }
+        }
+         
+      });
 
       $('#btnWeekDays').click(function(){
         $('#chkIsMonday').prop("checked", true);
@@ -1117,6 +1243,168 @@
         $('#chkIsWednesday').prop("checked", true);
         $('#chkIsThursday').prop("checked", true);
         $('#chkIsFriday').prop("checked", true);
+        chkMon = 1;
+        chkTue = 1;
+        chkWed = 1;
+        chkThu = 1;
+        chkFri = 1;
+        daysHadSelected = 1;
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsSunday').change(function(){
+        if($(this).prop("checked")==true){
+          chkSun = 1;
+          daysHadSelected = 1; 
+        }
+        else{
+          chkSun = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsMonday').change(function(){
+        if($(this).prop("checked")==true){
+          chkMon = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkMon = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsTuesday').change(function(){
+        if($(this).prop("checked")==true){
+          chkTue = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkTue = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsWednesday').change(function(){
+        if($(this).prop("checked")==true){
+          chkWed = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkWed = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsThursday').change(function(){
+        if($(this).prop("checked")==true){
+          chkThu = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkThu = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsFriday').change(function(){
+        if($(this).prop("checked")==true){
+          chkFri = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkFri = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+      $('#chkIsSaturday').change(function(){
+        if($(this).prop("checked")==true){
+          chkSat = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkSat = 0;
+          HasDaysSelected();
+        }
+        btnWorkSched_Settings();
+      });
+
+
+
+ 
+      $('#btnWorkSched').click(function(){
+     
+       if(durationFrom<CurDate){
+        update_last = CurDate;
+       }
+       else{
+        update_last = durationFrom;
+       }
+       update_next = moment(update_last).subtract(3, 'days').format('YYYY-MM-DD');
+
+
+       $.ajax({
+            url:'db/dbWorkSched.php',
+            method: 'post',
+            data:{
+                    phpMode: phpMode,
+                    php_empId: <?php echo $empID; ?>,
+                    php_workName: workName,
+                    php_durationFrom: durationFrom,
+                    php_durationTo: durationTo,
+                    php_chkPerpetual: chkPerpetual,
+                    php_logStart: startTime,
+                    php_logEnd: endTime, 
+                    php_chkNextDayLogOut: chkNextDayLogOut,
+                    php_isSun: chkSun,
+                    php_isMon: chkMon,
+                    php_isTue: chkTue,
+                    php_isWed: chkWed,
+                    php_isThu: chkThu,
+                    php_isFri: chkFri,
+                    php_isSat: chkSat,
+                    php_idTerminal: idTerminal,
+                    php_updateLast:update_last,
+                    php_updateNext:update_next,
+                    php_isOutNextDay:chkNextDayLogOut,
+                    php_isPerpetual: chkPerpetual,
+                    php_roomCode: roomCode,
+                    php_idProgram:programId
+            },
+            success: function(data){
+             // alert(data);  
+              if(phpMode=='add'){
+                if(data =='0'){
+                   alert('The work schedule that you are about to save for ' +  employeeName +  ' is in conflict with his/her existing schedule named ' + workName +  ' effective between ' + durationFrom + ' to ' + durationTo + ' with scheduled logs from ' + startTime + ' to ' + endTime);
+                }
+                else if (data =='00'){
+                  alert('ERROR in saving work schedule details');
+                }
+                else if (data=='000'){
+                  alert('Error in checking conflict schedules');
+                }
+                else if (data=='0000'){
+                  alert('Error in saving in its audit trail');
+                }
+                else if (data=='1'){
+                  alert("Successfully saved the work schedule details!");
+                  location.reload();
+                }
+              }
+              
+              
+              
+            }
+        });
+        
+        
       });
 
       function getUserPic(){
@@ -1200,6 +1488,33 @@
 
 
 
+      }
+
+      function btnWorkSched_Settings(){
+        
+        if((workName == null || workName == '') || (roomCode == null || roomCode == '') || (programId == null || programId == 0) || 
+           (durationFrom == null) || (durationTo == null) || 
+           (startTime == null) || (endTime == null) || (daysHadSelected == 0)){
+              
+            $('#btnWorkSched').attr("disabled", true);
+          
+        }
+        else{
+            $('#btnWorkSched').attr("disabled", false);
+        
+        }
+       
+     
+        
+      }
+
+      function HasDaysSelected(){
+        if((chkSun == 1) || (chkMon==1) || (chkTue==1) || (chkWed==1) || (chkThu==1) || (chkFri==1) || (chkSat==1)){
+          daysHadSelected = 1;
+        }
+        else{
+          daysHadSelected = 0;
+        }
       }
 
      

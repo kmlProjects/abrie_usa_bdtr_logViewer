@@ -1,4 +1,4 @@
-<!-- FOR v.2.0.4
+<!-- FOR v.2.0.5
 - include the Work Schedule CRUD
   *index.php ---DataTable--Change nge Column Action into Logs
   *index.php ---Add Column in DataTable, name it S  chedules with corresponding button
@@ -11,14 +11,15 @@
       --default Settings(No filder Date & Hide Expired Schedules)
       -- No filter Date & Show Epired Schedules
       -- With Filter
-  *Another Feature added
-  --Add Feature in WorkSched.php
+  *Add Feature in WorkSched.php
       --create modal settings for submit button
       --create function in adding details in tbl workschedule
+      --create function in schedule conflict checker
       --create syntax to add data in audit trail
-      --add record in its audit trail after successfully added a record in tbl_work_schedule
-      
-    
+  *Another Feature added
+      -Modify Function to tbl workSchedule and its AT
+      -Void Function to workSchedule and its
+      -Viewing of History of selected row in tbl_work_schedule
 -->
 
 
@@ -63,7 +64,7 @@
             <!-- 
               
             -->
-           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.4</span></label> </h1>
+           <h1> <label class='label' id="appTitle"><span>DTR LOG VIEWER v.2.0.5</span></label> </h1>
     </div>
 
     <!-- Outer Row -->

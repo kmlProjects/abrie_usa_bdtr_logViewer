@@ -27,11 +27,11 @@
             $query = "SELECT 
                                 WS.id_work_schedule,
                                 E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
-                                WS.work_name, R.room_code,
+                                WS.work_name, R.id_room, R.room_code, WS.id_terminal, WS.id_program,
                                 DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
                                 WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
-                                WS.log_start, WS.log_end, WS.is_voided
-                          FROM tbl_work_schedule AS WS
+                                WS.log_start, WS.log_end, WS.is_voided, WS.is_perpetual, WS.is_outnextday
+                          FROM tbl_work_schedule AS WS  
                             INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                             INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
                             INNER JOIN tbl_rooms	AS R on R.room_code = WS.room_code
@@ -46,10 +46,10 @@
             $query = "SELECT 
                                 WS.id_work_schedule,
                                 E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
-                                WS.work_name, R.room_code,
+                                WS.work_name, R.id_room, R.room_code, WS.id_terminal, WS.id_program,
                                 DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
                                 WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
-                                WS.log_start, WS.log_end, WS.is_voided
+                                WS.log_start, WS.log_end, WS.is_voided, WS.is_perpetual, WS.is_outnextday
                           FROM tbl_work_schedule AS WS
                               INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                               INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
@@ -61,10 +61,10 @@
             $query = "SELECT 
                                 WS.id_work_schedule,
                                 E.id_employee, concat(E.fname, ' ', left(E.midname,1), '. ', E.lname) As EmpName, 
-                                WS.work_name, R.room_code,
+                                WS.work_name,  R.id_room, R.room_code, WS.id_terminal, WS.id_program, 
                                 DATE(WS.duration_from) As durationFrom, DATE(WS.duration_to) As durationTo,
                                 WS.is_sunday, WS.is_monday, WS.is_tuesday, WS.is_wednesday, WS.is_thursday, WS.is_friday, WS.is_saturday,
-                                WS.log_start, WS.log_end, WS.is_voided
+                                WS.log_start, WS.log_end, WS.is_voided, WS.is_perpetual, WS.is_outnextday
                           FROM tbl_work_schedule AS WS
                             INNER JOIN tbl_employee AS E on E.id_employee = WS.	id_employee
                             INNER JOIN tbl_terminal AS T on T.id_terminal = WS.id_terminal
@@ -78,33 +78,32 @@
              
              // echo "<br />";        
              // echo $query;
-
   //for list of room codes
   $query_allRoomCode = "SELECT id_room, room_code, id_terminal FROM tbl_rooms";
-
+  
   //for list of program names
   $query_allProgramList = "SELECT P.id_program, P.program_name 
                               FROM  tbl_program AS P
                                   INNER JOIN tbl_userprogram AS UP on UP.id_program = P.id_program
                               WHERE UP.id_dtrviewer_user = $dtruser";
   try{
-
+    
     $executeQuery_RoomCode = mysqli_query($con, $query_allRoomCode);
     if(!$executeQuery_RoomCode){
       //error
     }
     else{
-      $loop_counter = 0;
+      $loop_counter  = 0;
+     
+      
       while($result=mysqli_fetch_assoc($executeQuery_RoomCode)){
-        $roomCode_array[$loop_counter] = array( "idRoom"=>$result['id_room'],
-                                                "roomCode"=>$result['room_code'],
-                                                "idTerminal"=>$result['id_terminal']
-  
-        );
-        $loop_counter++;
+          $roomCode_array[$loop_counter] = array("idRoom"=>$result['id_room'],
+                                                  "idTerminal"=>$result['id_terminal'],
+                                                  "roomCode"=>$result['room_code']);
+          $loop_counter++;
       }
-    }
-
+    }  
+  
     //for program names
     $executeQuery_ProgramName = mysqli_query($con,$query_allProgramList);
     if(!$executeQuery_ProgramName ){
@@ -450,19 +449,22 @@
                       <tr class="text-center">
                         <th><strong>WORK NAME</strong></th>    <!-- column0 -->
                         <th><strong>ROOM CODE</strong></th> <!-- column1 -->
-                        <th style='display:none'>durationFrom</th> <!-- column2 -->
-                        <th style='display:none'>durationTo</th> <!-- column3 -->
-                        <th><strong>DURATION</strong></th> <!-- column4 -->
-                        <th><strong>DAYS</strong></th> <!-- column5 -->
-                        <th style='display:none'>logStart</th> <!-- column6 -->
-                        <th style='display:none'>logEnd</th> <!-- column7 -->
-                        <th><strong>TIME</strong></th> <!-- column8 -->
-                        <th><strong>ACTION</strong></th> <!-- column9 -->
+                        <th style='display:none'>idProgram</th> <!-- column2 -->
+                        <th style='display:none'>durationFrom</th>  <!-- column3 -->
+                        <th style='display:none'>durationTo</th> <!-- column4 -->
+                        <th><strong>DURATION</strong></th> <!-- column5 -->
+                        <th><strong>DAYS</strong></th> <!-- column6 -->
+                        <th style='display:none'>logStart</th> <!-- column7 -->
+                        <th style='display:none'>logEnd</th> <!-- column8 -->
+                        <th><strong>TIME</strong></th> <!-- column9 -->
+                        <th><strong>ACTION</strong></th> <!-- column10 -->
+                        <th style='display:none'>isPerpetual</th><!-- column11 -->
+                        <th style='display:none'>isOutNextDay</th><!-- column12 -->
                       </tr>
                     </thead>
                     <tfoot >
                         <tr class='text-danger'>
-                            <th colspan='10'>
+                            <th colspan='13'>
                                 <div class='custom-control custom-checkbox small text-right text-danger' style="position:relative;margin-top:10px">
                                         <input type='checkbox'  data-role='ws_hideExpired' name='chkBx_empAll' id='chkHideExpired'
                                           <?php 
@@ -500,10 +502,13 @@
                                         <td>
                                             <?php echo $result_workSched['room_code'];?> <!-- column1 ROOM CODE-->
                                         </td>
-                                        <td style='display:none'> <!-- column2 DurationFrom-->
+                                        <td style='display:none'>
+                                            <?php echo $result_workSched['id_program'];?> <!-- column2 idProgram-->
+                                        </td>
+                                        <td style='display:none'> <!-- column3 DurationFrom-->
                                             <?php  echo $result_workSched['durationFrom'];?>
                                         </td>
-                                        <td style='display:none'> <!-- column3 DurationTo-->
+                                        <td style='display:none'> <!-- column4 DurationTo-->
                                             <?php echo $result_workSched['durationTo'];?>
                                       </td>
                                       <td>
@@ -511,9 +516,9 @@
                                                 $durationFrom = new DateTime($result_workSched['durationFrom']);
                                                 $durationTo = new DateTime($result_workSched['durationTo']);
                                                 echo $durationFrom->format('M.d,Y').' - '. $durationTo->format('M.d,Y');
-                                            ?> <!-- column4 DURATION-->
+                                            ?> <!-- column5 DURATION-->
                                       </td>
-                                        <td> <!-- column5 DAYS-->
+                                        <td> <!-- column6 DAYS-->
                                             <?php 
                                                 $flag_Day=0; //indicator if there were days have been listed
 
@@ -581,37 +586,45 @@
                                                                 }
                                                         }
                                                         break;
-                                                    default:
-                                                        if($flag_Day==1){
-                                                          echo ' Sat';
-                                                        }
-                                                        else{
-                                                          echo 'Sat';
-                                                          $flag_Day =1;
-                                                        }
+                                                      case "7":
+                                                        if($result_workSched['is_saturday']==1){
+                                                          if($flag_Day==1){
+                                                            echo ' Sat';
+                                                          }
+                                                          else{
+                                                            echo 'Sat';
+                                                            $flag_Day =1;
+                                                          }
+                                                  }
+                                                      break;
                                                   }      
                                                 }
 
                                             ?>
                                         </td>
                                         <td style='display:none'>
-                                            <?php echo $result_workSched['log_start'];?>  <!-- column6 logStart-->
+                                            <?php echo $result_workSched['log_start'];?>  <!-- column7 logStart-->
                                         </td>
                                         <td style='display:none'>
-                                            <?php echo $result_workSched['log_end'];?>    <!-- column7 logEnd-->
+                                            <?php echo $result_workSched['log_end'];?>    <!-- column8 logEnd-->
                                         </td>
-                                        <!-- column8-->
+                                        <!-- column9-->
                                         <td> 
                                               <?php 
                                                     $logStart = new DateTime($result_workSched['log_start']);
                                                     $logEnd = new DateTime($result_workSched['log_end']);
                                                     echo $logStart->format('g:i A').'-'.$logEnd->format('g:i A'); ?>
                                         </td>
-                                        
-                                        
                                         <td>
                                           <button data-toggle="editWS" title="EDIT" data-role="editWS" class="btn btn-success btn-sm btn-circle"  
                                                   data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  data-WsisSun="<?php echo $result_workSched['is_sunday'];?>" data-WsisMon="<?php echo $result_workSched['is_monday'];?>"
+                                                  data-WsisTue="<?php echo $result_workSched['is_tuesday'];?>" data-WsisWed="<?php echo $result_workSched['is_wednesday'];?>"
+                                                  data-WsisThu="<?php echo $result_workSched['is_thursday'];?>" data-WsisFri="<?php echo $result_workSched['is_friday'];?>"
+                                                  data-WsisSat="<?php echo $result_workSched['is_saturday'];?>" 
+                                                  data-WsidTerminal="<?php echo $result_workSched['id_terminal'];?>" 
+                                                  data-WsidRoom="<?php echo $result_workSched['id_room']; ?>"
+                                                  data-WsisVoid="<?php echo $result_workSched['is_voided']; ?>"
                                                   style="width:18%" name='btnEditWS' id="btnEditWS">
                                               <span class='icon text-white-50'>
                                               <i class='far'>&#xf044;</i> 
@@ -619,20 +632,33 @@
                                             <!-- <span class='text'>EDIT </span> -->
                                           </button>
                                           &nbsp; 
-                                          <button data-toggle="deleteWS" title="DELETE" data-role="deleteWS" class="btn btn-primary btn-sm btn-circle"  
+                                          <button data-toggle="deleteWS" title="DELETE" data-role="deleteWS" class="btn btn-danger btn-sm btn-circle"  
                                                   data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  data-WsisSun="<?php echo $result_workSched['is_sunday'];?>" data-WsisMon="<?php echo $result_workSched['is_monday'];?>"
+                                                  data-WsisTue="<?php echo $result_workSched['is_tuesday'];?>" data-WsisWed="<?php echo $result_workSched['is_wednesday'];?>"
+                                                  data-WsisThu="<?php echo $result_workSched['is_thursday'];?>" data-WsisFri="<?php echo $result_workSched['is_friday'];?>"
+                                                  data-WsisSat="<?php echo $result_workSched['is_saturday'];?>" 
+                                                  data-WsidTerminal="<?php echo $result_workSched['id_terminal'];?>" 
+                                                  data-WsidRoom="<?php echo $result_workSched['id_room']; ?>"
                                                   style="width:18%" name='btnDeleteWS' id="btnDeleteWS">
                                             <span class='icon text-white-50'>
-                                            <i class='fas'>&#xf4fd; </i>
+                                            <i class='fas'>&#xf410; </i>
                                             </span>
                                           <!-- <span class='text'>SHOW</span> -->
                                           </button>
                                           &nbsp;
-                                          <button data-toggle="voidWS" title="VOID" data-role="voidWS" class="btn btn-danger btn-sm btn-circle"  
+                                          <button data-toggle="voidWS" title="VOID" data-role="voidWS" class="btn btn-primary btn-sm btn-circle"  
                                                   data-WSid="<?php echo $result_workSched['id_work_schedule']; ?>" data-isvoided="<?php echo $result_workSched['is_voided']; ?>" 
+                                                  data-WsisSun="<?php echo $result_workSched['is_sunday'];?>" data-WsisMon="<?php echo $result_workSched['is_monday'];?>"
+                                                  data-WsisTue="<?php echo $result_workSched['is_tuesday'];?>" data-WsisWed="<?php echo $result_workSched['is_wednesday'];?>"
+                                                  data-WsisThu="<?php echo $result_workSched['is_thursday'];?>" data-WsisFri="<?php echo $result_workSched['is_friday'];?>"
+                                                  data-WsisSat="<?php echo $result_workSched['is_saturday'];?>" 
+                                                  data-WsidTerminal="<?php echo $result_workSched['id_terminal'];?>" 
+                                                  data-WsidRoom="<?php echo $result_workSched['id_room']; ?>"
+                                                  data-WsisVoid="<?php echo $result_workSched['is_voided']; ?>"
                                                   style="width:18%" name='btnVoidWS' id="btnVoidWS">
                                             <span class='icon text-white-50'>
-                                            <i class='fas'>&#xf410; </i>
+                                            <i class='fas'>&#xf4fd; </i>
                                             </span>
                                             <!-- <span class='text'>VOID</span> -->
                                           </button>
@@ -647,6 +673,12 @@
                                           </button>
 
                                         </td>
+                                        <td style='display:none'>
+                                            <?php echo $result_workSched['is_perpetual'];?> <!-- column2 idProgram-->
+                                        </td>
+                                        <td style='display:none'>
+                                            <?php echo $result_workSched['is_outnextday'];?> <!-- column2 idProgram-->
+                                        </td>
                                   </tr> 
                       <?php   }
                             }
@@ -660,12 +692,6 @@
               </div>
           </div>
         <div>
-        
-
-
-    
-
-
       </div><!-- /.content-wrapper -->
     </div><!-- wrapper -->
   </div>  <!-- End of Main Content -->
@@ -730,18 +756,17 @@
                       <div class="col-5">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <label class="input-group-text" for="roomCodeList">Room Code:</label>
+                              <label class="input-group-text" for="roomCodeList">Room Code:</label>
                             </div>
                             <select id="roomCodeList" class="custom-select">
-                              <option value="0" disabled selected>Pick a room code..
-                              </option>
+                                <option value="0" disabled selected>Pick a room code..
                                 <?php
                                     $roomCode_array_count = count($roomCode_array);
                                     for($x=0; $x<$roomCode_array_count; $x++){
-                                              $idTerminal = $roomCode_array[$x]['idTerminal'];
-                                              echo "<option value= $idTerminal />";
+                                           $valueProgram = $roomCode_array[$x]['idRoom'];
+                                          echo "<option value= $valueProgram />";
                                                     echo $roomCode_array[$x]['roomCode'];
-                                              echo "</option>";
+                                          echo "</option>";
                                     }
                                 ?>
                             </select>
@@ -896,8 +921,6 @@
                                         </div>
                                     </div>            
                                 </fieldset>
-                            
-                          
                       </div>
                   </div>
                    <!--=======================================================================================-->
@@ -911,7 +934,7 @@
       </div>
     </div>
   </div>
-  <!-- Modal  No selected Dates-->     
+  <!-- Modal for Add/Edit Form --> <!-- modal-dialog-centered -->
 
   
   <!-- Modal for No selected Dates from filter command -->
@@ -931,7 +954,41 @@
       </div>
     </div>
   </div>
-  <!-- Modal  No selected Dates-->     
+  <!-- Modal  No selected Dates-->    
+  
+
+  <!-- Modal for Success Update -->
+  <div class="modal fade" id="errorWorkSchedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Conflict of Schedule</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+              <?php 
+                  $workName =  $_SESSION['workNameConflict'];
+                  $durFrom =  $_SESSION['durationFrom'];
+                  $durTo =  $_SESSION['durationTo'];
+                  $log_Start = $_SESSION['log_start'];
+                  $log_End =  $_SESSION['log_end'];
+                echo "<p>";
+                          echo "The work schedule that you are about to save for <strong><label class'=label' id='lblemployeeName'></label></strong>";
+                          echo " is in conflict with his/her existing schedule named  <strong><label class'=label>" . $workName."</label></strong>";
+                          echo "  effective between <strong><label class'=label>" .  $durFrom . " </label></strong> to <strong><label class'=label>" . $durTo  . " </label></strong> with scheduled logs from <strong><label class'=label>" . $log_Start . "</label></strong> to <strong><label class'=label>" . $log_End. "</label></strong>.";
+                echo "</p>";
+              ?>
+              
+        </div>
+        <div class="modal-footer mdl_footer">
+          <button class="btn btn-warning" type="button" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Modal for Success Update -->
 
   
   <!-- Logout Modal-->
@@ -979,15 +1036,20 @@
       
       var CurDate = null;
       var prevDate = null;
+      var id_workSched;
       var dateStart, dateEnd;
       var employeeName; 
-      var workName,roomCode, roomCode, programId;
-      var durationFrom, durationTo, chkPerpetual;
+      var workName,roomCode, idRoom, programId;
+      var durationFrom, durationTo,  chkPerpetual;
       var startTime, endTime, chkNextDayLogOut;
       var idTerminal;
       var chkSun, chkMon, chkTue, chkWed, chkThu, chkFri, chkSat, daysHadSelected;
+      var isVoid;
+      var Sun, Mon, Tue, Wed, Thu, Fri, Sat;
+      var schedDays;
       var phpMode;
       var update_last, update_next;
+      var json_rooCodeParse;
 
       daysHadSelected = 0;
       chkPerpetual = 0;
@@ -1110,23 +1172,28 @@
 
       
       $('#btnAddWorkSched').click(function(){
-        
-       
+      
+        //phpMode = 'uponAdd';
         $('#lblEmpName').text(employeeName);
         $('#mdlAddEdit_WS').modal('show');
-        $('.modal-title').text("Add Work Schedule");
+        $('#mdlAddEdit_WS .modal-title').text("Add Work Schedule");
         phpMode = 'add';
       });
 
       $('#mdlAddEdit_WS').on('shown.bs.modal', function (){
-          clearWSForm()
           $('#txtWorkName').focus();
-          $('#mdl_addEdit_durationFrom').val(CurDate);
-          durationFrom = $('#mdl_addEdit_durationFrom').val();
-          if(phpMode == 'add'){
+
+          if(phpMode =='add'){
+            clearWSForm()
+            $('#mdl_addEdit_durationFrom').val(CurDate);
+            durationFrom = $('#mdl_addEdit_durationFrom').val();
             $('#btnWorkSched').html('Submit');
+            
           }
           else{
+            
+            $('#roomCodeList').val($('#roomCodeList option').eq(idRoom).val());
+            $('#programNameList').val($('#programNameList option').eq(programId).val());
             $('#btnWorkSched').html('Update');
           }
           btnWorkSched_Settings();
@@ -1143,12 +1210,25 @@
       });
       
       $('#roomCodeList').change(function(){
+        
         roomCode = $('#roomCodeList option:selected').text();
-        //intended for ID TERMINAL
-        idTerminal = $('#roomCodeList option:selected').val();  
+        idRoom = $('#roomCodeList option:selected').val();
+        
+        <?php $json_roomCode = json_encode($roomCode_array); ?>
+        json_roomCodeParse = <?php echo $json_roomCode;?>
+        //alert(roomCode)
+        for(var z in json_roomCodeParse){
+          
+          if(json_roomCodeParse[z].idRoom == idRoom){
+             idTerminal = json_roomCodeParse[z].idTerminal;
+             break;
+          }
+        }
+        
         btnWorkSched_Settings();
       });
-
+      
+      
       $('#programNameList').change(function(){
         programId = $('#programNameList option:selected').val();
         btnWorkSched_Settings();
@@ -1175,17 +1255,16 @@
 
       $('#chkdurationPerpetual').change(function(){
         if($(this).prop("checked")==true){
-          chkPerpetual = 1; 
+          chkPerpetual = 1;   
           $('#mdl_addEdit_durationTo').val('2100-12-31');
           durationTo =  $('#mdl_addEdit_durationTo').val();
-          $('#divDurationTo').hide();
+          $('#mdl_addEdit_durationTo').hide();
         }
         else{
           chkPerpetual = 0;
           $('#mdl_addEdit_durationTo').val('');
-          $('#divDurationTo').show();
+          $('#mdl_addEdit_durationTo').show();
           durationTo='';
-
         }
         
         btnWorkSched_Settings();
@@ -1198,7 +1277,6 @@
       
       $('#mdl_addEdit_endTime').change(function(){
         endTime = $(this).val();
-        
 
         if( chkNextDayLogOut == 0){
           if(endTime < startTime){
@@ -1214,9 +1292,6 @@
         else{
           btnWorkSched_Settings();
         }
-        
-       
-
         
       });
 
@@ -1335,9 +1410,6 @@
         }
         btnWorkSched_Settings();
       });
-
-
-
  
       $('#btnWorkSched').click(function(){
      
@@ -1348,20 +1420,25 @@
         update_last = durationFrom;
        }
        update_next = moment(update_last).subtract(3, 'days').format('YYYY-MM-DD');
-
-
-       $.ajax({
+      
+       if(phpMode=='add'){
+        id_workSched = 0;
+       }
+       
+       
+        $.ajax({
             url:'db/dbWorkSched.php',
             method: 'post',
             data:{
                     phpMode: phpMode,
+                    phpWorkSchedId: id_workSched,
                     php_empId: <?php echo $empID; ?>,
-                    php_workName: workName,
-                    php_durationFrom: durationFrom,
-                    php_durationTo: durationTo,
+                    php_workName: workName.trim(),
+                    php_durationFrom: durationFrom.trim(),
+                    php_durationTo: durationTo.trim(),
                     php_chkPerpetual: chkPerpetual,
-                    php_logStart: startTime,
-                    php_logEnd: endTime, 
+                    php_logStart: startTime.trim(),
+                    php_logEnd: endTime.trim(), 
                     php_chkNextDayLogOut: chkNextDayLogOut,
                     php_isSun: chkSun,
                     php_isMon: chkMon,
@@ -1375,14 +1452,19 @@
                     php_updateNext:update_next,
                     php_isOutNextDay:chkNextDayLogOut,
                     php_isPerpetual: chkPerpetual,
-                    php_roomCode: roomCode,
+                    php_isVoid: 0,
+                    php_roomCode: roomCode.trim(),
                     php_idProgram:programId
             },
             success: function(data){
-             // alert(data);  
-              if(phpMode=='add'){
+             
+             
+              if((phpMode=='add') || (phpMode=='edit')){
                 if(data =='0'){
-                   alert('The work schedule that you are about to save for ' +  employeeName +  ' is in conflict with his/her existing schedule named ' + workName +  ' effective between ' + durationFrom + ' to ' + durationTo + ' with scheduled logs from ' + startTime + ' to ' + endTime);
+                 
+                  $('#lblemployeeName').text(employeeName);
+                  $('#errorWorkSchedModal').modal('show');
+                   //alert('The work schedule that you are about to save for ' +  employeeName +  ' is in conflict with his/her existing schedule named ' + workName +  ' effective between ' + durationFrom + ' to ' + durationTo + ' with scheduled logs from ' + startTime + ' to ' + endTime);
                 }
                 else if (data =='00'){
                   alert('ERROR in saving work schedule details');
@@ -1393,6 +1475,9 @@
                 else if (data=='0000'){
                   alert('Error in saving in its audit trail');
                 }
+                else if (data=='00000'){
+                  alert("Error in updating record");
+                }
                 else if (data=='1'){
                   alert("Successfully saved the work schedule details!");
                   location.reload();
@@ -1401,11 +1486,241 @@
               
               
               
+              
             }
         });
         
         
       });
+
+
+      //dataTable buttons
+      $('.table tbody').on('click','#btnEditWS',function(){
+        $('[data-toggle="editLogs"]').tooltip('hide');
+        $('#lblEmpName').text(employeeName);
+        $('#mdlAddEdit_WS').modal('show');
+        $('.modal-title').text("Edit Work Schedule");
+        phpMode = 'edit';
+
+        //get all data from dataTable ad pass to modal elements
+        id_workSched = $(this).attr("data-WSid");
+
+        var current_row = $(this).closest('tr');
+        
+        workName = current_row.find('td:eq(0)').text();
+        $('#txtWorkName').val(workName.trim());
+
+        roomCode = current_row.find('td:eq(1)').text();
+        idRoom = $(this).attr("data-WsidRoom");
+        
+        <?php $json_roomCode = json_encode($roomCode_array); ?>
+        json_roomCodeParse = <?php echo $json_roomCode;?>
+        
+        for(var z in json_roomCodeParse){
+          
+          if(json_roomCodeParse[z].idRoom == idRoom){
+             idTerminal = json_roomCodeParse[z].idTerminal;
+             break;
+          }
+        }        
+        //setting value for room code comboBox c/o to shown modal event
+       
+
+        programId = current_row.find('td:eq(2)').text().trim();
+        //setting value for program comboBox c/o to shown modal event
+       
+
+        durationFrom = current_row.find('td:eq(3)').text();
+        $('#mdl_addEdit_durationFrom').val(durationFrom.trim());
+
+        chkPerpetual = current_row.find('td:eq(11)').text().trim();
+        
+        if(chkPerpetual=='0'){
+          chkPerpetual = 0; 
+          durationTo = current_row.find('td:eq(4)').text();
+          $('#mdl_addEdit_durationTo').val(durationTo.trim());
+        }
+        else{
+          chkPerpetual = 1; 
+          $('#chkdurationPerpetual').prop('checked', true);
+          $('#mdl_addEdit_durationTo').val('2100-12-31');
+          durationTo =  $('#mdl_addEdit_durationTo').val();
+          $('#mdl_addEdit_durationTo').hide();
+        }
+   
+        startTime = current_row.find('td:eq(7)').text().trim();
+        $('#mdl_addEdit_startTime').val(startTime);
+
+        endTime = current_row.find('td:eq(8)').text().trim();
+        $('#mdl_addEdit_endTime').val(endTime);
+
+        chkNextDayLogOut = current_row.find('td:eq(12)').text().trim();
+        if(chkNextDayLogOut=='0'){
+          chkNextDayLogOut = 0;
+        }
+        else{
+          chkNextDayLogOut = 1;
+          $('#chkNextDayLogout').prop('checked', true);
+        }
+        
+        Sun = $(this).attr("data-WsisSun");
+        if(Sun==1){
+          $('#chkIsSunday').prop("checked", true);
+          chkSun = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkSun = 0;
+        }
+
+        Mon = $(this).attr("data-WsisMon");
+        if(Mon==1){
+          $('#chkIsMonday').prop("checked", true);
+          chkMon = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkMon = 0;
+        }
+
+        Tue = $(this).attr("data-WsisTue");
+        if(Tue==1){
+          $('#chkIsTuesday').prop("checked", true);
+          chkTue = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkTue = 0;
+        }
+
+        Wed = $(this).attr("data-WsisWed");
+        if(Wed==1){
+          $('#chkIsWednesday').prop("checked", true);
+          chkWed = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkWed = 0;
+        }
+
+        Thu = $(this).attr("data-WsisThu");
+        if(Thu==1){
+          $('#chkIsThursday').prop("checked", true);
+          chkThu = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkThu = 0;
+        }
+
+        Fri = $(this).attr("data-WsisFri");
+        if(Fri==1){
+          $('#chkIsFriday').prop("checked", true);
+          chkFri = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkFri = 0;
+        }
+
+        Sat = $(this).attr("data-WsisSat");
+        if(Sat==1){
+          $('#chkIsSaturday').prop("checked", true);
+          chkSat = 1;
+          daysHadSelected = 1;
+        }
+        else{
+          chkSat = 0;
+        }
+        
+      });
+
+      $('.table tbody').on('click','#btnDeleteWS',function(){
+        phpMode = 'delete';
+        id_workSched = $(this).attr("data-WSid");
+
+        //Temporarily no deletion of records
+      });
+
+      $('.table tbody').on('click','#btnVoidWS',function(){
+        phpMode = 'void';
+        
+        id_workSched = $(this).attr("data-WSid");
+       
+
+        var current_row = $(this).closest('tr');
+        workName = current_row.find('td:eq(0)').text().trim();
+        
+ 
+        $.ajax({
+            url:'db/dbWorkSched.php',
+            method: 'post',
+            data:{
+                    phpMode: phpMode,
+                    phpWorkSchedId: id_workSched,
+                    php_empId: <?php echo $empID; ?>,
+                    php_workName: workName
+                    
+            },
+            success: function(data){
+
+              if(data == "2"){
+                alert("Error in voiding a record in work schedule");
+              }
+              else if(data=='22'){
+                alert("Error in voiding a record in logs");
+              }
+              else {
+                alert("The selected record has been voided successfully!");
+                location.reload(true);
+              }
+            }
+        });
+
+        
+        
+      });
+
+      $('.table tbody').on('click','#btnAuditTrailWS',function(){
+
+        id_workSched = $(this).attr("data-WSid");
+        var current_row = $(this).closest('tr');
+        workName = current_row.find('td:eq(0)').text();
+
+        $.ajax({
+            url:'db/session_idWorkSched.php',
+            method: 'post',
+            data:{
+              phpWorkSchedID: id_workSched,
+              phpWorkName: workName
+                    
+            },
+            success: function(data){
+              location.replace("workSchedAT.php");
+             
+            }
+        });
+      });
+
+
+      $('.table tbody').on('mouseover','#btnEditWS',function(){
+        isVoid = $(this).attr("data-WsisVoid");
+        if(isVoid==1){
+            $(this).attr('disabled',true);
+            $('[data-toggle="editWS"]').tooltip('hide');
+          }
+      });
+
+      $('.table tbody').on('mouseover','#btnVoidWS',function(){
+        isVoid = $(this).attr("data-WsisVoid");
+        if(isVoid==1){
+            $(this).attr('disabled',true);
+            $('[data-toggle="voidWS"]').tooltip('hide');
+          }
+      });
+      
+
+    
 
       function getUserPic(){
         $.ajax({
@@ -1474,6 +1789,7 @@
           $('#programNameList').val(0);
           $('#mdl_addEdit_durationFrom').val(CurDate);
           $('#mdl_addEdit_durationTo').val('');
+          $('#mdl_addEdit_durationTo').show();
           $('#chkdurationPerpetual').prop("checked", false);
           $('#mdl_addEdit_startTime').val('');
           $('#mdl_addEdit_endTime').val('');
@@ -1488,16 +1804,18 @@
 
 
 
+
       }
 
       function btnWorkSched_Settings(){
         
+     
         if((workName == null || workName == '') || (roomCode == null || roomCode == '') || (programId == null || programId == 0) || 
            (durationFrom == null) || (durationTo == null) || 
            (startTime == null) || (endTime == null) || (daysHadSelected == 0)){
               
             $('#btnWorkSched').attr("disabled", true);
-          
+           
         }
         else{
             $('#btnWorkSched').attr("disabled", false);

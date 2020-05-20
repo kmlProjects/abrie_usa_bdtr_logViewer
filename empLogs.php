@@ -655,176 +655,178 @@
             <button type="button" class="close mdl_x_button" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body mdl_body">
-              <div class="row">
-                <div class="col-3">
-                  <div id="editdivImage" >  </div> 
-                </div>
-                <div class="col-9">
+            <div class="card" id="mdl_ws_body">
+              <div class="card-body">
                   <div class="row">
-                    <div class="col-4">
-                      <label class="label">Employee Name:&nbsp;</label>
+                    <div class="col-3">
+                      <div id="editdivImage" >  </div> 
                     </div>
-                    <div class="col-8">
-                      <label class="label"><strong><?php echo $employeeName; ?></strong></label>
+                    <div class="col-9">
+                      <div class="row">
+                        <div class="col-4">
+                          <label class="label">Employee Name:&nbsp;</label>
+                        </div>
+                        <div class="col-8">
+                          <label class="label"><strong><?php echo $employeeName; ?></strong></label>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-4">
+                          <label class="label">Work Name:&nbsp;</label>
+                        </div>
+                        <div class="col-8">
+                          <label class="label"><strong><?php echo $workName; ?></strong></label>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-4">
+                          <label class="label">Department:&nbsp;</label>
+                        </div>
+                        <div class="col-8">
+                          <label class="label"><strong><?php echo $department; ?></strong></label>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-4">
+                          <label class="label">DTR Location:&nbsp;</label>
+                        </div>
+                        <div class="col-8">
+                          <label class="label"><strong><?php echo $dtrLoc; ?></strong></label>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-4">
+                          <label class="label">Reason for editing:&nbsp;</label>
+                        </div>
+                        <div class="col-8">
+                        <textarea class="form-control" rows="3" id="comment"></textarea>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-4">
-                      <label class="label">Work Name:&nbsp;</label>
-                    </div>
-                    <div class="col-8">
-                      <label class="label"><strong><?php echo $workName; ?></strong></label>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-4">
-                      <label class="label">Department:&nbsp;</label>
-                    </div>
-                    <div class="col-8">
-                      <label class="label"><strong><?php echo $department; ?></strong></label>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-4">
-                      <label class="label">DTR Location:&nbsp;</label>
-                    </div>
-                    <div class="col-8">
-                      <label class="label"><strong><?php echo $dtrLoc; ?></strong></label>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-4">
-                      <label class="label">Reason for editing:&nbsp;</label>
-                    </div>
-                    <div class="col-8">
-                    <textarea class="form-control" rows="3" id="comment"></textarea>
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-              <br/>
-              
-                      
-              <!-- LOGIN DETAILS -->
-              <div class="row"> </div>
-              <div class="row">
-                  <div class="col-4">
-                    <label class="label"><strong>LOGIN Details:</strong>&nbsp;</label>
-                  </div>
-              </div>
-              <div class="row">
-                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-2">
-                    <label class="label">Start of duty:&nbsp;</label>
-                  </div>
-                  <div class="col-4 text-left">
-                    <strong><label id="edit_dutyDate"></label></strong>
-                  </div>
-              </div>
-              <div class="row">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-2">
-                    <label class="label">Login time:</label>
-                  </div>
-                  <div class="col-3 text-left">
-                  <strong>
-                    <label id="lblActualIn" ></label>
-                    <div>
-                      <input type="time" id="txtActualIn" class="form-control">                      
-                    </div>
-                    </strong>
-                  </div>
-                  <div class="col-2 text-right">
-                         <button type="button" data-toggle="editLogin" title="Click to EDIT the LOGIN!" 
-                                data-placement="bottom" class="btn btn-success" style="width:100%" id="btnEditLogin">
-                          <span class='icon text-white-50'>
-                            <i class='far'>&#xf044;</i>
-                          </span> 
-                          EDIT
-                        </button> 
-                       
-                  </div>
-                  <div class="col-4 text-left">
-                    <button type="button"  data-toggle="removeLogin" title="Click to remove the login!" class="btn btn-danger" style="width:100%" id="btnRemoveLogin">
-                        <span class='icon text-white-50'>
-                            <i class='fas'>&#xf235;</i> 
-                        </span> 
-                        REMOVE LOGIN
-                    </button> 
                     
                   </div>
-              </div>
-              <div class="row">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-3">
-                    <label id="lbllate" class="label">Minutes late:&nbsp;</label>
+                  <br/>    
+                  <!-- LOGIN DETAILS -->
+                  <div class="row"> </div>
+                  <div class="row">
+                      <div class="col-4">
+                        <label class="label"><strong>LOGIN Details:</strong>&nbsp;</label>
+                      </div>
                   </div>
-                  <div class="col-1 text-left">
-                  <strong><label id="edit_minlate"></label></strong>
+                  <div class="row">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-2">
+                        <label class="label">Start of duty:&nbsp;</label>
+                      </div>
+                      <div class="col-5 text-left">
+                        <strong><label id="edit_dutyDate"></label></strong>
+                      </div>
                   </div>
-              </div>
-              <!-- end of LOGIN DETAILS -->
-
-              <!-- LOGOUT DETAILS -->
-              <br/>
-              <div class="row"> </div>
-              <div class="row">
-                  <div class="col-4">
-                    <label class="label"><strong>LOGOUT Details:</strong>&nbsp;</label>
-                  </div>
-              </div>
-              <div class="row">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-2">
-                    <label class="label">End of duty:&nbsp;</label>
-                  </div>
-                  <div class="col-4 text-left">
-                    <strong><label id="edit_OutdutyDate"></label></strong>
-                  </div>
-              </div>
-              <div class="row">
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-2">
-                    <label class="label">Logout time:&nbsp;</label>
-                  </div>
-                  <div class="col-3">
-                    <strong>
-                    <label id="lblActualOut" ></label>
-                    <input type="time" id="txtActualOut" class="form-control">
-                    </strong>
-                  </div>
-                  <div class="col-2 text-right">
-                        <button type="button" data-toggle="editLogout" title="Click to EDIT the LOGOUT!"
-                                data-placement="bottom" class="btn btn-success" style="width:100%" id="btnEditLogout">
-                          <span class='icon text-white-50'>
-                            <i class='far'>&#xf044;</i> 
-                          </span>
-                          EDIT
-                        </button>
-                       
-                  </div>
-                  <div class="col-4 text-left ">
-                        <button type="button" data-toggle="removeLogout" title="Click to REMOVE the LOGOUT!"
-                                data-placement="bottom" class="btn btn-danger" style="width:100%" id="btnRemoveLogout">
+                  <div class="row">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-2">
+                        <label class="label">Login time:</label>
+                      </div>
+                      <div class="col-3 text-left">
+                      <strong>
+                        <label id="lblActualIn" ></label>
+                        <div>
+                          <input type="time" id="txtActualIn" class="form-control">                      
+                        </div>
+                        </strong>
+                      </div>
+                      <div class="col-2 text-right">
+                            <button type="button" data-toggle="editLogin" title="Click to EDIT the LOGIN!" 
+                                    data-placement="bottom" class="btn btn-success" style="width:100%" id="btnEditLogin">
+                              <span class='icon text-white-50'>
+                                <i class='far'>&#xf044;</i>
+                              </span> 
+                              EDIT
+                            </button> 
+                          
+                      </div>
+                      <div class="col-4 text-left">
+                        <button type="button"  data-toggle="removeLogin" title="Click to remove the login!" class="btn btn-danger" style="width:100%" id="btnRemoveLogin">
                             <span class='icon text-white-50'>
-                              <i class='fas'>&#xf235;</i> 
+                                <i class='fas'>&#xf235;</i> 
                             </span> 
-                            REMOVE LOGOUT
-                        </button>
+                            REMOVE LOGIN
+                        </button> 
                         
+                      </div>
                   </div>
-              </div>
-              <div class="row">
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <div class="col-3">
-                    <label class="label">Minutes undertime:&nbsp;</label>
+                  <div class="row">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-3">
+                        <label id="lbllate" class="label">Minutes late:&nbsp;</label>
+                      </div>
+                      <div class="col-1 text-left">
+                      <strong><label id="edit_minlate"></label></strong>
+                      </div>
                   </div>
-                  <div class="col-2 text-left">
-                    <strong><label id="edit_minunder"></label></strong>
+                  <!-- end of LOGIN DETAILS -->
+
+                  <!-- LOGOUT DETAILS -->
+                  <br/>
+                  <div class="row"> </div>
+                  <div class="row">
+                      <div class="col-4">
+                        <label class="label"><strong>LOGOUT Details:</strong>&nbsp;</label>
+                      </div>
                   </div>
-              </div>
-              <!-- end of LOGOUT DETAILS -->
+                  <div class="row">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-2">
+                        <label class="label">End of duty:&nbsp;</label>
+                      </div>
+                      <div class="col-5 text-left">
+                        <strong><label id="edit_OutdutyDate"></label></strong>
+                      </div>
+                  </div>
+                  <div class="row">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-2">
+                        <label class="label">Logout time:&nbsp;</label>
+                      </div>
+                      <div class="col-3">
+                        <strong>
+                        <label id="lblActualOut" ></label>
+                        <input type="time" id="txtActualOut" class="form-control">
+                        </strong>
+                      </div>
+                      <div class="col-2 text-right">
+                            <button type="button" data-toggle="editLogout" title="Click to EDIT the LOGOUT!"
+                                    data-placement="bottom" class="btn btn-success" style="width:100%" id="btnEditLogout">
+                              <span class='icon text-white-50'>
+                                <i class='far'>&#xf044;</i> 
+                              </span>
+                              EDIT
+                            </button>
+                          
+                      </div>
+                      <div class="col-4 text-left ">
+                            <button type="button" data-toggle="removeLogout" title="Click to REMOVE the LOGOUT!"
+                                    data-placement="bottom" class="btn btn-danger" style="width:100%" id="btnRemoveLogout">
+                                <span class='icon text-white-50'>
+                                  <i class='fas'>&#xf235;</i> 
+                                </span> 
+                                REMOVE LOGOUT
+                            </button>
+                            
+                      </div>
+                  </div>
+                  <div class="row">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="col-3">
+                        <label class="label">Minutes undertime:&nbsp;</label>
+                      </div>
+                      <div class="col-2 text-left">
+                        <strong><label id="edit_minunder"></label></strong>
+                      </div>
+                  </div>
+                  <!-- end of LOGOUT DETAILS -->
+              <div>
+            </div>  
           </div>
           <div class="modal-footer mdl_footer">
             <button type="button" class="btn btn-primary pull-right" name="update" id="btnUpdate">Update</button>
@@ -1032,7 +1034,7 @@
       </div>
     </div>
   </div>
-  <!-- Modal for Success Update -->
+<!-- Modal for Success Update -->
  
 
 
@@ -1207,6 +1209,7 @@
           dutyIn_actualFormat = $(this).attr("data-dutyIn");
           dutyOut_actualFormat = $(this).attr("data-dutyOut");
 
+          
          
          
           $("#editModal").modal();
